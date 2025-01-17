@@ -5,13 +5,53 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Translatable\HasTranslations;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations, ProductPriceScope;
     protected $guarded = [];
     protected $appends = ['is_variant','variants','image_url','origin_image'];
 
+    protected $casts = ['price' => 'array'];
+    protected $translatable = [
+        'name',
+        'slug',
+        'contents',
+        'allergens',
+        'currency',
+        'price',
+        'variant_name_1',
+        'variant_name_2',
+        'variant_name_3',
+        'variant_name_4',
+        'variant_name_5',
+        'variant_name_6',
+        'variant_name_7',
+        'variant_name_8',
+        'variant_name_9',
+        'variant_name_10',
+        'variant_name_11',
+        'variant_name_12',
+        'variant_name_13',
+        'variant_name_14',
+        'variant_name_15',
+        'variant_price_1',
+        'variant_price_2',
+        'variant_price_3',
+        'variant_price_4',
+        'variant_price_5',
+        'variant_price_6',
+        'variant_price_7',
+        'variant_price_8',
+        'variant_price_9',
+        'variant_price_10',
+        'variant_price_11',
+        'variant_price_12',
+        'variant_price_13',
+        'variant_price_14',
+        'variant_price_15'
+    ];
 
     public function scopeAccount($query)
     {
@@ -55,7 +95,7 @@ class Product extends Model
     
     public function getIsVariantAttribute()
     {
-         $variantColumns = [
+        $variantColumns = [
         ['variant_name_1', 'variant_price_1'],
         ['variant_name_2', 'variant_price_2'],
         ['variant_name_3', 'variant_price_3'],
@@ -75,11 +115,8 @@ class Product extends Model
 
        foreach ($variantColumns as $columns) {
         $nameColumn = $columns[0];  
-        $priceColumn = $columns[1]; 
-
        
-        if (!is_null($this->{$nameColumn}) && $this->{$nameColumn} !== '' &&
-            !is_null($this->{$priceColumn}) && $this->{$priceColumn} !== '') {
+        if (!is_null($this->{$nameColumn}) && $this->{$nameColumn} !== '') {
             return true;
         }
     }
@@ -113,7 +150,7 @@ class Product extends Model
             $name = $this->{$variant['name']};
             $price = $this->{$variant['price']};
 
-            if (!is_null($name) && $name !== '' && !is_null($price) && $price !== '') {
+            if (!is_null($name) && $name !== '') {
                 $variantObject = (object)[
                     'name' => $name,
                     'price' => $price,
@@ -137,4 +174,5 @@ class Product extends Model
         }
         return false;
     }
+
 }

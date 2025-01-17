@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('slug');
+            $table->json('name');
+            $table->json('slug');
             $table->string('image');
             $table->integer('status')->default(1);
-            $table->foreignId('categorie_id')->nullable()->constrained()->cascadeOnDelete();
             $table->integer('width')->default(100);
+            $table->foreignId('categorie_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
+            $table->integer('order_id')->nullable();
             $table->boolean('import')->default(false);
             $table->timestamps();
         });

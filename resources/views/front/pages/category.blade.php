@@ -7,9 +7,9 @@
                 <div class="swiper-slide" id="detailTop">
                     <div>
                         <div>
-                            <img src="{{ asset('storage/' . $account->banner_logo) }}" alt="{{ $account->name }}">
+                            <img src="{{ asset('storage/' . $account->banner_logo) }}" alt="{{ $account->name }}" style="width:{{$account->category_logo_width}}px;">
                             <h3>{{ $categorie->name }}</h3>
-                            <a href="{{ route('menu', $account->slug) }}">Menüye Dön</a>
+                            <a href="{{ route('menu', $account->slug) }}">{{__('all.return_to_menu')}}</a>
                         </div>
                         <img src="{{ $categorie->origin_image }}" />
                     </div>
@@ -19,7 +19,6 @@
     </div>
     <div class="yellow_lane">
         <div class="odin_list">
-            
             @if ($categorie->childs->isNotEmpty())
                 @foreach ($categorie->childs as $child)
                 @if($child->products->isNotEmpty())
@@ -39,7 +38,7 @@
                                                 <li>
                                                     <div style="color:{{$account->body_color}}">{{ $variant->name }}</div>
                                                     <div></div>
-                                                    <div style="color:{{$account->body_color}}"><strong>{{ $variant->price }}</strong>{{ $product->currency }}
+                                                    <div style="color:{{$account->body_color}}"><strong>{{ $variant->price ?? '-' }}</strong>{{ $product->currency }}
                                                     </div>
                                                 </li>
                                             @endforeach
@@ -83,7 +82,7 @@
                                     <li>
                                         <div style="color:{{$account->body_color}}">{{ $variant->name }}</div>
                                         <div></div>
-                                        <div style="color:{{$account->body_color}}"><strong>{{ $variant->price }}</strong>{{ $product->currency }}</div>
+                                        <div style="color:{{$account->body_color}}"><strong>{{ $variant->price ?? '-' }}</strong>{{ $product->currency }}</div>
                                     </li>
                                 @endforeach
                             </ul>

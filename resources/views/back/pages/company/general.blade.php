@@ -50,51 +50,89 @@
                             @csrf
                             @method('PUT')
                         
-                            <div class="row mb-4">
+                            <div class="row mb-5">
                                 <div class="col-12 col-md-6">
                                     <h5 class="mb-0">Firma Logosu</h5>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <div class="box border w-100px shadow">
-                                        <img src="{{auth()->user()->account->logo ? asset('storage/'.auth()->user()->account->logo) : asset('assets/media/other/gorselyok.png')}}" alt="{{auth()->user()->account->name}}" class="img-fluid" style="width: 100px;">
+                                    <div class="box border w-100px shadow position-relative">
+                                        @if(auth()->user()->account->logo)
+                                       <a href="javascript:void(0)" class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;" onclick="deleteLogo()">
+                                               &times;
+                                        </a>
+                                        @endif
+                                        <img src="{{ auth()->user()->account->logo ? asset('storage/'.auth()->user()->account->logo) : asset('assets/media/other/gorselyok.png') }}" 
+                                         alt="{{ auth()->user()->account->name }}" 
+                                         class="img-fluid" 
+                                         style="width: 100px;">
                                     </div>
                                     <input class="form-control" type="file" name="logo" id="formFile">
                                 </div>
                             </div>
-                        
-                            <div class="row mb-4">
+                            <div class="row mb-5">
                                 <div class="col-12 col-md-6">
                                     <h5 class="mb-0">Firma Banner</h5>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <div class="box border w-100px shadow">
-                                        <img src="{{auth()->user()->account->banner_image ? asset('storage/'.auth()->user()->account->banner_image) : asset('assets/media/other/gorselyok.png')}}" alt="{{auth()->user()->account->name}}" class="img-fluid" style="width: 100px;">
+                                    <div class="box border w-100px shadow position-relative">
+                                     @if(auth()->user()->account->banner_image)
+                                     <a href="javascript:void(0)" 
+                                     class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                     style="width: 24px; height: 24px;" 
+                                     onclick="deleteBanner()">
+                                          &times;
+                                     </a>
+                                    @endif
+                                    <img src="{{ auth()->user()->account->banner_image ? asset('storage/'.auth()->user()->account->banner_image) : asset('assets/media/other/gorselyok.png') }}" 
+                                    alt="{{ auth()->user()->account->name }}" 
+                                    class="img-fluid" 
+                                    style="width: 100px;">
                                     </div>
                                     <input class="form-control" type="file" name="banner_image" id="formFile2">
                                 </div>
                             </div>
-                        
-                            <div class="row mb-4">
+                            <div class="row mb-5">
                                 <div class="col-12 col-md-6">
                                     <h5 class="mb-0">Firma Banner Logo</h5>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <div class="box border w-100px shadow">
-                                        <img src="{{auth()->user()->account->banner_logo ? asset('storage/'.auth()->user()->account->banner_logo) : asset('assets/media/other/gorselyok.png')}}" alt="{{auth()->user()->account->name}}" class="img-fluid" style="width: 100px;">
+                                    <div class="box border w-100px shadow position-relative">
+                                    @if(auth()->user()->account->banner_logo)
+                                    <a href="javascript:void(0)" 
+                                    class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                    style="width: 24px; height: 24px;" 
+                                    onclick="deleteBannerLogo()">
+                                          &times;
+                                    </a>
+                                    @endif
+                                    <img src="{{ auth()->user()->account->banner_logo ? asset('storage/'.auth()->user()->account->banner_logo) : asset('assets/media/other/gorselyok.png') }}" 
+                                    alt="{{ auth()->user()->account->name }}" 
+                                    class="img-fluid" 
+                                    style="width: 100px;">
                                     </div>
                                     <input class="form-control" type="file" name="banner_logo" id="formFile3">
                                 </div>
                             </div>
-                        
-                            <div class="row mb-4">
+                            <div class="row mb-5">
                                 <div class="col-12 col-md-6">
                                     <h5 class="mb-0">Placeholder</h5>
                                 </div>
                                 <div class="col-12 col-md-6">
-                                    <div class="box border w-100px shadow">
-                                        <img src="{{auth()->user()->account->placeholder_image ? asset('storage/'.auth()->user()->account->placeholder_image) : asset('assets/media/other/gorselyok.png')}}" alt="{{auth()->user()->account->name}}" class="img-fluid" style="width: 100px;">
-                                    </div>
-                                    <input class="form-control" type="file" name="placeholder_image" id="formFile4">
+                                 <div class="box border w-100px shadow position-relative">
+                                 @if(auth()->user()->account->placeholder_image)
+                                 <a href="javascript:void(0)" 
+                                 class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                 style="width: 24px; height: 24px;" 
+                                 onclick="deletePlaceholder()">
+                                       &times;
+                                 </a>
+                                @endif
+                                <img src="{{ auth()->user()->account->placeholder_image ? asset('storage/'.auth()->user()->account->placeholder_image) : asset('assets/media/other/gorselyok.png') }}" 
+                                alt="{{ auth()->user()->account->name }}" 
+                                class="img-fluid" 
+                                style="width: 100px;">
+                                </div>
+                                <input class="form-control" type="file" name="placeholder_image" id="formFile4">
                                 </div>
                             </div>
                         
@@ -235,7 +273,7 @@
 <script>
      $('#citySelect').change(function() {
         const selectedOption = this.options[this.selectedIndex];
-         const dataId = $(selectedOption).data('id');  // JQuery ile data-id değerini al
+         const dataId = $(selectedOption).data('id'); 
             $.ajax({
                 type: "POST",
                 url: "{{ route('district') }}",
@@ -260,5 +298,74 @@
                 }
             });
         });
+
+        function deleteLogo(){
+      Swal.fire({
+          title:'Dikkat!',
+          text: 'Logoyu kaldırmak istediğinizden emin misiniz?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Evet, Kaldır',
+          cancelButtonText: 'İptal'
+      }).then((result) => {
+      if (result.isConfirmed) {
+       window.location.href = "{{route('company_settings.removeLogo')}}";
+      }
+      });
+    }
+    
+    function deleteBanner(){
+      Swal.fire({
+          title:'Dikkat!',
+          text: 'Bannerı kaldırmak istediğinizden emin misiniz?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Evet, Kaldır',
+          cancelButtonText: 'İptal'
+      }).then((result) => {
+      if (result.isConfirmed) {
+       window.location.href ="{{route('company_settings.removeBanner')}}";
+      }
+      });
+    }
+    
+    function deleteBannerLogo(){
+      Swal.fire({
+          title:'Dikkat!',
+          text: 'Banner logoyu kaldırmak istediğinizden emin misiniz?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Evet, Kaldır',
+          cancelButtonText: 'İptal'
+      }).then((result) => {
+      if (result.isConfirmed) {
+       window.location.href = "{{route('company_settings.removeBannerLogo')}}";
+      }
+      });
+    }
+    
+    
+    function deletePlaceholder(){
+      Swal.fire({
+          title:'Dikkat!',
+          text: 'Placeholderı kaldırmak istediğinizden emin misiniz?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Evet, Kaldır',
+          cancelButtonText: 'İptal'
+      }).then((result) => {
+      if (result.isConfirmed) {
+       window.location.href = "{{route('company_settings.removePlaceholder')}}";
+      }
+      });
+    }
 </script>
 @endsection

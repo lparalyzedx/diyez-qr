@@ -143,8 +143,18 @@
                                           <span class="badge badge-sm badge-light-primary"> {{!empty($categorie->real_path) ? $categorie->real_path : '/'}}</span>
                                         </td>
                                         <td class="text-start px-md-12 px-12 py-6">
-                                            <img src="{{ $categorie->origin_image }}" width="80px"
-                                                height="50px" class=" object-fit-contain" alt="{{ $categorie->name }}">
+                                            <div class="position-relative">
+                                                @if($categorie->image)
+                                                   <a href="javascript:void(0)" 
+                                                       class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                                       style="width: 24px; height: 24px;" 
+                                                       onclick="deleteImage('{{route('categories.deleteImage',$categorie->id)}}')">
+                                                       &times;
+                                                   </a>
+                                                 @endif
+                                               <img src="{{ asset('storage/' . (!is_null($categorie->image) ? $categorie->image : auth()->user()->account->placeholder_image)) }}" width="100px"
+                                                   height="60px" class=" object-fit-cover" alt="{{ $categorie->name }}">
+                                               </div>
                                         </td>
                                         <td class="text-start px-md-12 px-12 py-6">
                                             {{ $categorie->products_count }}
@@ -254,9 +264,9 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label for="example1" class="form-label">Kategori Adı</label>
-                                <input type="text" class="form-control @error('name') border-danger @enderror"
-                                    name="name" id="example1" value="{{ old('name') }}" required>
-                                @error('name')
+                                <input type="text" class="form-control @error(app()->getLocale().'_name') border-danger @enderror"
+                                    name="{{app()->getLocale()}}_name" id="example1" value="{{ old(app()->getLocale().'_name') }}" required>
+                                @error(app()->getLocale().'_name')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -334,11 +344,11 @@
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-12">
-                                <label for="update_name" class="form-label">Kategori Adı</label>
-                                <input type="text" class="form-control @error('update_name') border-danger @enderror"
-                                    name="update_name" id="update_name" value="{{ old('update_name') }}"
-                                    id="update_name" required>
-                                @error('update_name')
+                                <label for="update_{{app()->getLocale()}}_name" class="form-label">Kategori Adı</label>
+                                <input type="text" class="form-control @error('update_'.app()->getLocale().'_name') border-danger @enderror"
+                                    name="update_{{app()->getLocale()}}_name" id="update_{{app()->getLocale()}}_name" value="{{ old('update_'.app()->getLocale().'_name') }}"
+                                    id="update_{{app()->getLocale()}}_name" required>
+                                @error('update_'.app()->getLocale().'_name')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}
                                     </div>
                                 @enderror
@@ -409,6 +419,7 @@
 <script src="{{asset('assets/js/file.js')}}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+        const locale = "{{app()->getLocale()}}";
     const table = $('#kt_datatable_categories').DataTable({
         "info": true,
             'order': [],
@@ -631,7 +642,7 @@
                 if (response.success) {
                     console.log('Başarılı:', response.message);
                     document.querySelector(`tr[data-id="${categoryId}"] .categoryNameText`)
-                        .textContent = response.category.name;
+                        .textContent = response.category.name.{{app()->getLocale()}};
                 } else {
                     console.error('Başarısız:', response.message);
                 }
@@ -682,7 +693,7 @@
                     id: id
                 },
                 success: function(response) {
-                    $('#update_name').val(response.category.name);
+                    $('#update_{{app()->getLocale()}}_name').val(response.category.name.{{app()->getLocale()}});
                     var categorySelect = $('#update_categorie_id').select2();
                     categorySelect.find('option').each(function() {
                          var optionValue = $(this).val();
@@ -704,6 +715,23 @@
             Swal.fire({
                 title: 'Dikkat',
                 text: 'Kategoriyi silmek istediğinizden emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, Sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+
+        function deleteImage(url) {
+            Swal.fire({
+                title: 'Dikkat',
+                text: 'Kategori resmini silmek istediğinizden emin misiniz?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',

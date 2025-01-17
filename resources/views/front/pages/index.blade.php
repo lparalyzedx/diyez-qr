@@ -29,8 +29,10 @@
             @endif
         @endforeach
         @else
-         <h4 style="text-align:center; font-weight:200; color:{{$account->text_color}}">Bu QR Menü şu anda hizmet verememektedir.
-         Lütfen daha sonra tekrar deneyiniz veya altyapı sağlayıcınız ile İletişime geçiniz.</h4>
+        <div class="disable-account">
+            <span style="color: {{$account->body_color}}">Bu QR Menü şu anda hizmet verememektedir.</span>
+            <span style="color: {{$account->body_color}}">Lütfen daha sonra tekrar deneyiniz veya altyapı sağlayıcınız ile İletişime geçiniz.</span>
+        </div>
         @endif
     </div>
 </div>

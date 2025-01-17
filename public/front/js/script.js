@@ -42,3 +42,21 @@ $(document).ready(function(){
     });
 
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("languageModal");
+    const body = document.body;
+
+   
+        modal.style.display = "flex"; 
+        body.classList.add("modal-open"); 
+
+    const links = document.querySelectorAll("#languageModal a");
+    links.forEach(link => {
+        link.addEventListener("click", () => {
+            localStorage.setItem("languageSelected", "true");
+            body.classList.remove("modal-open"); 
+        });
+    });
+});
+

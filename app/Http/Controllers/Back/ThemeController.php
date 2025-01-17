@@ -22,7 +22,12 @@ class ThemeController extends Controller
         $account->update([
             'header_color' => $request->header_color,
             'body_color' => $request->body_color,
-            'text_color' => $request->text_color
+            'text_color' => $request->text_color,
+            'call_button_color' => $request->call_button_color,
+            'whatsapp_button_color' => $request->whatsapp_button_color,
+            'map_button_color' => $request->map_button_color,
+            'logo_width' => $request->logo_width,
+            'category_logo_width' => $request->category_logo_width
         ]);
 
         return redirect()->back()->with('success', 'Ayarlar başarıyla güncellendi.');

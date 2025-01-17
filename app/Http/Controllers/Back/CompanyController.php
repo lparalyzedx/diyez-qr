@@ -81,6 +81,35 @@ class CompanyController extends Controller
         return redirect()->back()->with('success', 'Ayarlar başarıyla güncellendi.');
     }
 
+    public function remove_logo()
+    {
+        $account = Account::query()->where('id',Auth::user()->account->id)->firstOrFail();
+        $account->update(['logo' => null]);
+        return redirect()->back()->with('success', 'Logo başarıyla kaldırıldı.');
+    }
+    
+    public function remove_banner()
+    {
+        $account = Account::query()->where('id',Auth::user()->account->id)->firstOrFail();
+        $account->update(['banner_image' => null]);
+        return redirect()->back()->with('success', 'Banner başarıyla kaldırıldı.');
+    }
+    
+    public function remove_banner_logo()
+    {
+        $account = Account::query()->where('id',Auth::user()->account->id)->firstOrFail();
+        $account->update(['banner_logo' => null]);
+        return redirect()->back()->with('success', 'Banner logo başarıyla kaldırıldı.');
+    }
+    
+    
+    public function remove_placeholder()
+    {
+        $account = Account::query()->where('id',Auth::user()->account->id)->firstOrFail();
+        $account->update(['placeholder_image' => null]);
+        return redirect()->back()->with('success', 'Placeholder başarıyla kaldırıldı.');
+    }
+
     public function district(Request $request)
     {
         $districts = District::where('city_id', $request->id)->get();

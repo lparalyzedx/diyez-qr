@@ -8,11 +8,13 @@ use App\Http\Controllers\Back\CategoryController;
 use App\Http\Controllers\Back\CompanyController;
 use App\Http\Controllers\Back\ProfileController;
 use App\Http\Controllers\Back\DashboardController;
+use App\Http\Controllers\Back\LanguageController;
 use App\Http\Controllers\Back\LocaleController;
 use App\Http\Controllers\Back\NotificationController;
 use App\Http\Controllers\Back\ProductController;
 use App\Http\Controllers\Back\SettingsController;
 use App\Http\Controllers\Back\ThemeController;
+use App\Http\Controllers\Back\TranslationController;
 use App\Http\Controllers\Back\UserController;
 use App\Http\Controllers\Back\VariantController;
 use App\Http\Controllers\Front\MenuController;
@@ -34,26 +36,31 @@ Route::get('artisan',function(){
     Artisan::call('storage:link');
 });
 
-Route::middleware('account')->group(function(){
-    Route::get('menu/{accountSlug}',[MenuController::class,'index'])->name('menu');
-    Route::get('menu/{accountSlug}/kategori/{slug}',[MenuController::class,'category'])->name('category');
-    Route::get('menu/{accountSlug}/urun/{slug}',[MenuController::class,'product'])->name('product');
+
+Route::get('locale/{locale}/{accountSlug}', action: [LanguageController::class, 'index'])->name('locale');
+
+Route::middleware(['account','lang'])->group(function(){
+    Route::get('menu/{accountSlug}',[MenuController::class,'locale'])->name('index');
+    Route::get('menu/{accountSlug}/main',[MenuController::class,'index'])->name('menu');
+    Route::get('menu/{accountSlug}/category/{slug}',[MenuController::class,'category'])->name('category');
+    Route::get('menu/{accountSlug}/product/{slug}',[MenuController::class,'product'])->name('product');
+    Route::get('menu/{accountSlug}/{any}',[MenuController::class,'any']);
 });
 
 Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'index'])->name('login');
     Route::post('/', [AuthController::class, 'login'])->name('login.post');
-    Route::get('kaydol',[AuthController::class,'register'])->name('register');
-    Route::post('kaydol', [AuthController::class, 'register_post'])->name('register.post');
-    Route::get('sifremi-unuttum', [ResetPasswordController::class, 'forgot'])->name('forgot');
-    Route::post('sifremi-unuttum', [ResetPasswordController::class, 'forgot_post'])->name('password.email');
-    Route::get('sifreyi-sifirla/{token}', [ResetPasswordController::class, 'reset_request'])->name('password.reset');
-    Route::post('sifreyi-sifirla', [ResetPasswordController::class, 'reset'])->name('password.update');
-    Route::get('sifreyi/dogrula/{email}', [ResetPasswordController::class, 'password_send'])->name('password.send');
+    Route::get('signup',[AuthController::class,'register'])->name('register');
+    Route::post('signup', [AuthController::class, 'register_post'])->name('register.post');
+    Route::get('forgot-password', [ResetPasswordController::class, 'forgot'])->name('forgot');
+    Route::post('forgot-password', [ResetPasswordController::class, 'forgot_post'])->name('password.email');
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'reset_request'])->name('password.reset');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+    Route::get('password/confirm/{email}', [ResetPasswordController::class, 'password_send'])->name('password.send');
 });
 
 
-Route::middleware(['auth'])->prefix('admin')->group(function () {
+Route::middleware(['auth','lang','locales'])->prefix('admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('profile', [ProfileController::class, 'profile_update'])->name('profile.update');
@@ -71,6 +78,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('categories/{id}',[CategoryController::class,'show'])->name('categories.show');
     Route::put('categories/{id}',[CategoryController::class,'update'])->name('categories.update');
     Route::get('categories/{id}/delete', [CategoryController::class, 'destroy'])->name('categories.delete');
+    Route::get('categories/{id}/delete/image', [CategoryController::class, 'deleteImage'])->name('categories.deleteImage');
     Route::post('update-category-name/{id}', [CategoryController::class, 'updateName'])->name('categories.updateName');
     Route::post('update-category-status/{id}', [CategoryController::class, 'updateStatus'])->name('categories.updateStatus');
 
@@ -84,6 +92,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('products/{id}',[ProductController::class,'show'])->name('products.show');
     Route::put('products/{id}',[ProductController::class,'update'])->name('products.update');
     Route::get('products/{id}/delete', [ProductController::class, 'destroy'])->name('products.delete');
+    Route::get('products/{id}/delete/images', [ProductController::class, 'deleteImage'])->name('products.deleteImage');
     Route::post('update-product-price/{id}', [ProductController::class, 'updatePrice'])->name('products.updatePrice');
     Route::post('update-product-name/{id}', [ProductController::class, 'updateName'])->name('products.updateName');
     Route::post('update-product-status/{id}', [ProductController::class, 'updateStatus'])->name('products.updateStatus');
@@ -95,7 +104,19 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::put('products/{productID}/variants/{variantID}',[VariantController::class,'update'])->name('variants.update');
     Route::get('products/{productID}/variants/{variantID}/delete',[VariantController::class,'destroy'])->name('variants.delete');
 
+
     Route::get('locales',[LocaleController::class,'index'])->name('locales.index');
+    Route::post('locales',[LocaleController::class,'store'])->name('locales.store');
+    Route::get('locales/{id}',[LocaleController::class,'show'])->name('locales.show');
+    Route::put('locales/{id}',[LocaleController::class,'update'])->name('locales.update');
+    Route::get('locales/{id}/delete',[LocaleController::class,'destroy'])->name('locales.delete');
+
+    Route::get('translations',[TranslationController::class,'index'])->name('translations.index');
+    Route::post('translations',[TranslationController::class,'store'])->name('translations.store');
+    Route::get('translations/{id}',[TranslationController::class,'show'])->name('translations.show');
+    Route::put('translations/{id}',[TranslationController::class,'update'])->name('translations.update');
+    Route::get('translations/{id}/delete',[TranslationController::class,'destroy'])->name('translations.delete');
+
 
 
 
@@ -125,6 +146,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
     Route::get('company/general-settings', [CompanyController::class, 'index'])->name('company_settings.index');
     Route::put('company/general-settings', [CompanyController::class, 'update'])->name('company_settings.update');
+
+    Route::get('company/settings/remove-logo', [CompanyController::class, 'remove_logo'])->name('company_settings.removeLogo');
+    Route::get('company/settings/remove-banner', [CompanyController::class, 'remove_banner'])->name('company_settings.removeBanner');
+    Route::get('company/settings/remove-banner-logo', [CompanyController::class, 'remove_banner_logo'])->name('company_settings.removeBannerLogo');
+    Route::get('company/settings/remove-placeholder', [CompanyController::class, 'remove_placeholder'])->name('company_settings.removePlaceholder');
 
     Route::get('company/theme-settings',[ThemeController::class,'index'])->name('theme_settings.index');
     Route::put('company/theme-settings',[ThemeController::class,'update'])->name('theme_settings.update');

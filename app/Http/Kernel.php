@@ -69,5 +69,7 @@ class Kernel extends HttpKernel
         'view' => \App\Http\Middleware\View::class,
         'cors' => \App\Http\Middleware\Cors::class,
         'account' =>  \App\Http\Middleware\Account::class,
+        'locales' =>  \App\Http\Middleware\Locales::class,
+        'lang' =>  \App\Http\Middleware\Lang::class
     ];
 }

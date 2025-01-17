@@ -9,6 +9,7 @@ use App\Http\Requests\Back\UpdateCategoryRequest;
 use App\Imports\CategorieImport;
 use Illuminate\Support\Str;
 use App\Models\Categorie;
+use App\Models\Locale;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
@@ -17,40 +18,96 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Categorie::query()->account()->withCount('products')->orderBy('order_id','asc')->get();
+        $categories = Categorie::query()
+            ->account()
+            ->withCount("products")
+            ->orderBy("order_id", "asc")
+            ->get();
+        $locale = app()->getLocale();
 
-        $modals = ['create' => ['name','image','categorie_id'],'edit' => ['update_name','update_image','update_categorie_id'],'import' => ['xlsx']];
+        $modals = [
+            "create" => [$locale . "_name", "image", "categorie_id"],
+            "edit" => [
+                "update_" . $locale . "_name",
+                "update_image",
+                "update_categorie_id",
+            ],
+            "import" => ["xlsx"],
+        ];
 
-        return view('back.pages.categories.index',compact('categories','modals'));
+        return view(
+            "back.pages.categories.index",
+            compact("categories", "modals")
+        );
     }
-
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(StoreCategoryRequest $request)
     {
+        $locales = Locale::query()
+            ->account()
+            ->pluck("language_code")
+            ->toArray();
 
         $image = null;
 
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $file_name = Str::slug($request->name . uniqid()) . '.' . $file->getClientOriginalExtension();
-            Storage::putFileAs('categories', $file, $file_name);
-            $image = 'categories/' . $file_name;
+        if ($request->hasFile("image")) {
+            $file = $request->file("image");
+            $file_name =
+                Str::slug($request->name . uniqid()) .
+                "." .
+                $file->getClientOriginalExtension();
+            Storage::putFileAs("categories", $file, $file_name);
+            $image = "categories/" . $file_name;
+        }
+
+        $names = [];
+        $slugs = [];
+        $defaultName = null;
+        $defaultSlug = null;
+
+        foreach ($locales as $locale) {
+            $name = $request->input("{$locale}_name");
+            $names[$locale] = $name;
+            $slugs[$locale] = Str::slug($name);
+
+            if (!$defaultName && $name) {
+                $defaultName = $name;
+            }
+
+            if (!$defaultSlug && $slugs[$locale]) {
+                $defaultSlug = $slugs[$locale];
+            }
+        }
+
+        foreach ($names as $locale => $name) {
+            if (!$name) {
+                $names[$locale] = $defaultName;
+            }
+        }
+
+        foreach ($slugs as $locale => $slug) {
+            if (!$slug) {
+                $slugs[$locale] = $defaultSlug ?? Str::slug($defaultName);
+            }
         }
 
         Categorie::query()->create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'image' => $image,
-            'status' => $request->status ? 1 : 0,
-            'categorie_id' => $request->categorie_id == 0 ? null : $request->categorie_id,
-            'width' => intval($request->width),
-            'account_id' => $request->user()->account->id
+            "name" => $names,
+            "slug" => $slugs,
+            "image" => $image,
+            "status" => $request->status ? 1 : 0,
+            "categorie_id" =>
+                $request->categorie_id == 0 ? null : $request->categorie_id,
+            "width" => intval($request->width),
+            "account_id" => $request->user()->account->id,
         ]);
 
-        return redirect()->back()->with('success','Kategori başarıyla eklendi.');
+        return redirect()
+            ->back()
+            ->with("success", "Kategori başarıyla eklendi.");
     }
 
     /**
@@ -58,80 +115,124 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-       $category = Categorie::query()->account()->where('id',$id)->first();
+        $category = Categorie::query()
+            ->account()
+            ->where("id", $id)
+            ->first();
 
-       return response()->json([
-         'category' => $category
-       ],200);
+        return response()->json(
+            [
+                "category" => $category,
+            ],
+            200
+        );
     }
-    
-    
+
     public function json()
     {
-       $categories = Categorie::query()->account()->get();
+        $categories = Categorie::query()
+            ->account()
+            ->get();
 
-       return response()->json([
-         'categories' => $categories
-       ],200);
+        return response()->json(
+            [
+                "categories" => $categories,
+            ],
+            200
+        );
     }
-
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateCategoryRequest $request, string $id)
     {
-        $category = Categorie::query()->account()->where('id',$id)->firstOrFail();
+        $category = Categorie::query()
+            ->account()
+            ->where("id", $id)
+            ->firstOrFail();
 
         $image = $category->image;
 
-        if ($request->hasFile('update_image')) {
-            $file = $request->file('update_image');
-            $file_name = Str::slug($request->update_name . uniqid()) . '.' . $file->getClientOriginalExtension();
-            Storage::putFileAs('categories', $file, $file_name);
-            $image = 'categories/' . $file_name;
+        if ($request->hasFile("update_image")) {
+            $file = $request->file("update_image");
+            $file_name =
+                Str::slug($request->update_name . uniqid()) .
+                "." .
+                $file->getClientOriginalExtension();
+            Storage::putFileAs("categories", $file, $file_name);
+            $image = "categories/" . $file_name;
+        }
+
+        $names = json_decode($category->name, true) ?? [];
+        $slugs = json_decode($category->slug, true) ?? [];
+
+        $locale = app()->getLocale();
+        $newName = $request->input("update_" . $locale . "_name");
+
+        if ($newName) {
+            $names[$locale] = $newName;
+            $slugs[$locale] = Str::slug($newName);
         }
 
         $category->update([
-            'name' => $request->update_name,
-            'slug' => Str::slug($request->update_name),
-            'image' => $image,
-            'status' => $request->update_status ? 1 : 0,
-            'categorie_id' => ($request->update_categorie_id == 0 ? null : ($request->update_categorie_id != $category->id ? $request->update_categorie_id : null)),
-            'width' => intval($request->update_width)
+            "name" => $names,
+            "slug" => $slugs,
+            "image" => $image,
+            "status" => $request->update_status ? 1 : 0,
+            "categorie_id" =>
+                $request->update_categorie_id == 0
+                    ? null
+                    : ($request->update_categorie_id != $category->id
+                        ? $request->update_categorie_id
+                        : null),
+            "width" => intval($request->update_width),
         ]);
 
-        return redirect()->back()->with('success','Kategori başarıyla güncellendi.');
+        return redirect()
+            ->back()
+            ->with("success", "Kategori başarıyla güncellendi.");
     }
 
-     /**
+    /**
      * Listing the specified resource from database.
      */
 
     public function list()
     {
-        $categories = Categorie::query()->account()->with('childs')->where('categorie_id',NULL)->orderBy('order_id','asc')->withCount('products')->get();
-        return view('back.pages.categories.list',compact('categories'));
+        $categories = Categorie::query()
+            ->account()
+            ->with("childs")
+            ->where("categorie_id", null)
+            ->orderBy("order_id", "asc")
+            ->withCount("products")
+            ->get();
+        return view("back.pages.categories.list", compact("categories"));
     }
 
-     /**
+    /**
      * Sorting the specified resource from database.
      */
 
     public function sort(Request $request)
     {
-       $categories = Categorie::query()->account()->get();
+        $categories = Categorie::query()
+            ->account()
+            ->get();
         foreach ($categories as $categorie) {
-           foreach ($request->order as $order) {
-              if ($order['id'] == $categorie->id) {
-                 $categorie->update(['order_id' => $order['position']]);
-              }
+            foreach ($request->order as $order) {
+                if ($order["id"] == $categorie->id) {
+                    $categorie->update(["order_id" => $order["position"]]);
+                }
             }
         }
 
-        return response()->json([
-            'status' => true
-        ],200);
+        return response()->json(
+            [
+                "status" => true,
+            ],
+            200
+        );
     }
 
     /**
@@ -140,11 +241,11 @@ class CategoryController extends Controller
 
     public function sorting(Request $request)
     {
-        $data = $request->input('categories');
-    
+        $data = $request->input("categories");
+
         $this->updateSort($data);
-        
-        return response()->json(['success' => true]);
+
+        return response()->json(["success" => true]);
     }
 
     /**
@@ -154,17 +255,22 @@ class CategoryController extends Controller
     private function updateSort($categories, $parentId = null, $position = 0)
     {
         foreach ($categories as $category) {
-            
-            Categorie::query()->account()->where('id', $category['id'])->update([
-                'categorie_id' => $parentId,
-                'order_id' => $position
-            ]);
-    
-            
-            if (!empty($category['children'])) {
-                $this->updateSort($category['children'], $category['id'], $position + 1);
+            Categorie::query()
+                ->account()
+                ->where("id", $category["id"])
+                ->update([
+                    "categorie_id" => $parentId,
+                    "order_id" => $position,
+                ]);
+
+            if (!empty($category["children"])) {
+                $this->updateSort(
+                    $category["children"],
+                    $category["id"],
+                    $position + 1
+                );
             }
-    
+
             $position++;
         }
     }
@@ -172,40 +278,75 @@ class CategoryController extends Controller
     public function updateName(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            "name" => "required|string|max:255",
         ]);
 
-        $category = Categorie::query()->account()->findOrFail($id);
-        $category->name = $request->input('name');
-        $category->save();
+        $category = Categorie::query()
+            ->account()
+            ->findOrFail($id);
+
+        $names = json_decode($category->name, true) ?? [];
+        $slugs = json_decode($category->slug, true) ?? [];
+
+        $locale = app()->getLocale();
+        $newName = $request->input("name");
+
+        if ($newName) {
+            $names[$locale] = $newName;
+            $slugs[$locale] = Str::slug($newName);
+        }
+
+        $category->update([
+            "name" => $names,
+            "slug" => $slugs,
+        ]);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Kategori adı başarıyla güncellendi.',
-            'category' => $category
+            "success" => true,
+            "message" => "Kategori adı başarıyla güncellendi.",
+            "category" => $category,
         ]);
     }
 
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|integer|in:0,1',
+            "status" => "required|integer|in:0,1",
         ]);
 
-        $category = Categorie::query()->account()->findOrFail($id);
-        $category->status = $request->input('status');
+        $category = Categorie::query()
+            ->account()
+            ->findOrFail($id);
+        $category->status = $request->input("status");
         $category->save();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Kategori durumu başarıyla güncellendi.'
+            "success" => true,
+            "message" => "Kategori durumu başarıyla güncellendi.",
         ]);
     }
 
     public function import(ImportCategoryRequest $request)
     {
-        Excel::import(new CategorieImport, $request->file('xlsx'));
-        return back()->with('success', 'Excel dosyası başarıyla içe aktarıldı!');
+        Excel::import(new CategorieImport(), $request->file("xlsx"));
+        return back()->with(
+            "success",
+            "Excel dosyası başarıyla içe aktarıldı!"
+        );
+    }
+
+    public function deleteImage(string $id)
+    {
+        $category = Categorie::query()
+        ->account()
+        ->where("id", $id)
+        ->firstOrFail();
+
+        $category->update([
+            'image' => null
+        ]);
+
+        return redirect()->back()->with(['success' => 'Kategori resmi başarıyla silindi.']);
     }
 
     /**
@@ -213,14 +354,25 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = Categorie::query()->account()->where('id',$id)->firstOrFail();
-        
-        if($category->childs->isNotEmpty() || $category->products->isNotEmpty())
-        {
-            return redirect()->back()->withErrors(['warning' => 'Kategori içinde ürün veya kategoriler var.']);
+        $category = Categorie::query()
+            ->account()
+            ->where("id", $id)
+            ->firstOrFail();
+
+        if (
+            $category->childs->isNotEmpty() ||
+            $category->products->isNotEmpty()
+        ) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    "warning" => "Kategori içinde ürün veya kategoriler var.",
+                ]);
         }
-        
+
         $category->delete();
-        return redirect()->back()->with('success','Kategori başarıyla silindi.');
+        return redirect()
+            ->back()
+            ->with("success", "Kategori başarıyla silindi.");
     }
 }

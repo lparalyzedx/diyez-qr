@@ -1,4 +1,4 @@
-<html lang="tr">
+<html lang="{{app()->getLocale()}}">
 
 <head>
     <title>{{ config('app.name') }} | @yield('title', 'Anasayfa')</title>
@@ -92,7 +92,41 @@
                             </div>
                         </div>
                         <div class="app-navbar flex-shrink-0">
-                           
+      @unlessrole('root')
+    <div class="app-navbar-item ms-1 ms-md-3">
+       <a href="#"
+       class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-40px h-40px d-flex align-items-center justify-content-center"
+       data-kt-menu-trigger="{default:'click', lg: 'hover'}"
+       data-kt-menu-attach="parent"
+       data-kt-menu-placement="bottom-end">
+        @php
+            $currentLocaled = $__locales->firstWhere('language_code', app()->getLocale());
+        @endphp
+        <img src="{{ asset('storage/'.$currentLocaled?->flag) }}" 
+             class="rounded object-fit-cover" 
+             width="100" height="30" 
+             alt="{{ $currentLocaled?->name }}">
+    </a>
+    <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-title-gray-700 menu-icon-muted menu-active-bg menu-state-color fw-semibold py-4 fs-base w-150px"
+         data-kt-menu="true">
+        @foreach ($__locales as $__locale)
+                <div class="menu-item px-3 my-1">
+                    <a href="{{route('locale',['locale' => $__locale?->language_code, 'accountSlug' => auth()->user()->account->slug])}}" class="menu-link d-flex align-items-center px-3 py-2 {{$__locale->language_code == $currentLocaled?->language_code ? 'active' : ''}}">
+                        <span class="menu-icon me-3">
+                            <img src="{{ asset('storage/'.$__locale?->flag) }}" 
+                                 class=" object-fit-cover" 
+                                 width="50px" height="24" 
+                                 alt="{{ $__locale?->name }}">
+                        </span>
+                        <span class="menu-title mx-3">{{ $__locale?->name }}</span>
+                    </a>
+                </div>
+        @endforeach
+    </div>
+    </div>
+    @endunlessrole
+
+
                             <div class="app-navbar-item ms-1 ms-md-3">
                                 <a href="#"
                                     class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-30px h-30px w-md-40px h-md-40px"
@@ -383,6 +417,28 @@
                                             <span class="menu-title fs-6">Kullanıcılar</span>
                                         </a>
                                     </div>
+                                    <div class="menu-item">
+                                        <a class="menu-link  {{ request()->segment(2) == 'locales' ? 'active' : '' }}"
+                                            href="{{ route('locales.index') }}">
+                                            <span class="menu-icon">
+                                                <span class="svg-icon svg-icon-2">
+                                                    <i class="las la-language fs-1"></i>
+                                                </span>
+                                            </span>
+                                            <span class="menu-title fs-6">Dil Desteği</span>
+                                        </a>
+                                    </div>
+                                   <!-- <div class="menu-item">
+                                        <a class="menu-link  {{ request()->segment(2) == 'translations' ? 'active' : '' }}"
+                                            href="{{ route('translations.index') }}">
+                                            <span class="menu-icon">
+                                                <span class="svg-icon svg-icon-2">
+                                                    <i class="las la-globe-europe fs-1"></i>
+                                                </span>
+                                            </span>
+                                            <span class="menu-title fs-6">Çeviriler</span>
+                                        </a>
+                                    </div> -->
                                     <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{request()->segment(2) == 'company' ? 'show' : ''}}">
                                         <span class="menu-link">
                                             <span class="menu-icon">

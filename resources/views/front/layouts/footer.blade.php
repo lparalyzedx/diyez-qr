@@ -1,14 +1,14 @@
 <div class="odin_categories">
     <div class="top-buttons">
         @if($account->phone)
-          <a href="tel:{{$account->phone}}" class="btn call-button">Ara</a>
+          <a href="tel:{{$account->phone}}" class="btn call-button" style="background: {{$account->call_button_color}}">{{__('all.call_us')}}</a>
         @endif
         @if($account->whatsapp)
-        <a href="https://wa.me/{{$account->whatsapp}}" class="btn whatsapp-button">Whatsapp</a>
+        <a href="https://wa.me/{{$account->whatsapp}}" class="btn whatsapp-button" style="background: {{$account->whatsapp_button_color}}">Whatsapp</a>
         @endif
     </div>
     @if($account->map_url)
-     <a href="{{$account->map_url}}" class="btn route-button">Yol Tarifi Al</a>
+     <a href="{{$account->map_url}}" class="btn route-button" style="background: {{$account->map_button_color}}">{{__('all.get_directions')}}</a>
     @endif
 </div>
 <div class="v2_menu_footer">

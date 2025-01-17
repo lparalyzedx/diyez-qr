@@ -11,6 +11,7 @@
                     </li>
                 </ul>
             </div>
+            @unlessrole('root')
             <div data-kt-daterangepicker="true" data-kt-daterangepicker-opens="left" class="btn btn-sm fw-bold bg-body btn-color-gray-700 btn-active-color-primary d-flex align-items-center px-4">
                  <div class="text-gray-600 fw-bold">Loading date range...</div>
                  <span class="svg-icon svg-icon-1 ms-2 me-0">
@@ -21,7 +22,9 @@
                      </svg>
                  </span>
              </div>
-        </div>
+             @endunlessrole
+            </div>
+           
     </div>
     <div id="kt_app_content" class="app-content flex-column-fluid">
         @role('root')

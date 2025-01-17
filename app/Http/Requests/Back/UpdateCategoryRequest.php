@@ -22,7 +22,7 @@ class UpdateCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'update_name' => 'required|max:255',
+            'update_'.app()->getLocale().'_name' => 'required|max:255',
             'update_image' => 'nullable|image|mimes:png,jpg,jpeg',
             'update_categorie_id' => [
                  'nullable',

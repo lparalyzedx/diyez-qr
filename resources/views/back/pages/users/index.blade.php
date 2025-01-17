@@ -330,7 +330,8 @@
 
     function deleteUser(url){
       Swal.fire({
-          title: 'Kullanıcıyı Silmek istediğinizden emin misiniz?',
+          title: 'Dikkat!',
+          text: 'Kullanıcıyı Silmek istediğinizden emin misiniz?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',

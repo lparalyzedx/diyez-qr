@@ -5,17 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Translatable\HasTranslations;
 
 class Categorie extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
     protected $guarded = [];
+
+    protected $translatable = ['name','slug'];
 
     protected $appends = ['path','real_path','origin_image'];
 
     public function scopeAccount($query)
     {
-       return $query->where('account_id', Auth::user()->account->id);
+       return $query->where('account_id', Auth::user()?->account->id);
     }
 
     public function category()

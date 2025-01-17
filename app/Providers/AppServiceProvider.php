@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Account;
+use App\Models\Locale;
+use App\Observers\AccountObserver;
+use App\Observers\LocaleObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Account::observe(AccountObserver::class);
+        Locale::observe(LocaleObserver::class);
     }
 }

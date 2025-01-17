@@ -28,6 +28,12 @@ class MenuController extends Controller
         return view('front.pages.index');
     }
 
+    public function locale(string $slug)
+    {
+        $account = Account::query()->where('slug',$slug)->firstOrFail();
+        return view('front.pages.locale');
+    }
+
     public function category(string $accountSlug, string $slug)
 {
     $account = Account::query()->where('slug', $accountSlug)->firstOrFail();
@@ -40,7 +46,7 @@ class MenuController extends Controller
     try {
         $categorie = Categorie::query()
             ->where('account_id', $account->id)
-            ->where('slug', $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->where('status', 1)
             ->with(['products' => function($query) {
                 $query->where('status', 1)
@@ -59,6 +65,11 @@ class MenuController extends Controller
         return redirect()->route('menu', ['accountSlug' => $accountSlug])
             ->with('error', 'Kategoriye erişilemedi.');
     }
+}
+
+public function any(string $accountSlug, string $any)
+{
+    return redirect()->route('menu',$accountSlug);
 }
 
 }

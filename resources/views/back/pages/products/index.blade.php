@@ -1,6 +1,9 @@
 @extends('back.layouts.master')
 @section('title', 'Ürünler')
 @section('content')
+@php
+    $locale = app()->getLocale();
+@endphp
     <div class="d-flex flex-column flex-column-fluid">
         <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6 col-12">
             <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
@@ -199,14 +202,24 @@
                                                 value="{{ $product->name }}">
                                         </td>
                                         <td class="text-start px-md-12 px-12 py-6">
-                                                <img src="{{ $product->origin_image }}" alt="{{ $product->name }}"
-                                                    class="object-fit-contain" width="100px" height="60px">
+                                            <div class="position-relative">
+                                                @if($product->images)
+                                                   <a href="javascript:void(0)" 
+                                                       class="btn btn-danger btn-sm position-absolute top-0 start-0 translate-middle rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                                                       style="width: 24px; height: 24px;" 
+                                                       onclick="deleteImage('{{route('products.deleteImage',$product->id)}}')">
+                                                       &times;
+                                                   </a>
+                                                @endif
+                                                    <img src="{{ $product->origin_image }}" alt="{{ $product->name }}"
+                                                       class="object-fit-cover" width="100px" height="60px">
+                                               </div>
                                         </td>
                                         <td class="text-start px-md-12 px-12 py-6 productPriceContent">
                                             <p class="productPriceText d-block">
-                                                {{ $product->price ?? '-' }}{{ $product->currency }}</p>
+                                                {{ number_format($product->price,2) ?? '-' }}{{ $product->currency }}</p>
                                             <input type="text" class="form-control d-none productPrice"
-                                                placeholder="Ürün Fiyatı: 119.00" value="{{ $product->price }}">
+                                                placeholder="Ürün Fiyatı: 119.00" value="{{ number_format($product->price,2) }}">
                                         </td>
                                         <td class="text-start px-md-12 px-12 py-6 categoryContent">
                                             <p class="categoryText">{{ str()->limit($product->category->name, 50) }}</p>
@@ -456,11 +469,11 @@
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-12">
-                                <label for="name" class="form-label">Ürün Adı</label>
-                                <input type="text" name="name"
-                                    class="form-control @error('name') border-danger @enderror" id="name"
-                                    value="{{ old('name') }}" required>
-                                @error('name')
+                                <label for="{{$locale}}_name" class="form-label">Ürün Adı</label>
+                                <input type="text" name="{{$locale}}_name"
+                                    class="form-control @error($locale.'_name') border-danger @enderror" id="{{$locale}}_name"
+                                    value="{{ old($locale.'_name') }}" required>
+                                @error($locale.'_name')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -499,22 +512,22 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="price" class="form-label">Fiyat</label>
-                                <input type="text" class="form-control @error('price') border-danger @enderror"
-                                    name="price" value="{{ old('price') }}" id="price">
-                                @error('price')
+                                <label for="{{$locale}}_price" class="form-label">Fiyat</label>
+                                <input type="text" class="form-control @error($locale.'_price') border-danger @enderror"
+                                    name="{{$locale}}_price" value="{{ old($locale.'_price') }}" id="{{$locale}}_price">
+                                @error($locale.'_price')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="currency" class="form-label">Para Birimi</label>
-                                <select class="form-select @error('currency') border-danger @enderror"
-                                    name="currency" id="currency" required>
+                                <label for="{{$locale}}_currency" class="form-label">Para Birimi</label>
+                                <select class="form-select @error($locale.'_currency') border-danger @enderror"
+                                    name="{{$locale}}_currency" id="{{$locale}}_currency" required>
                                     <option value="₺" selected>₺</option>
                                     <option value="$">$</option>
                                     <option value="$">€</option>
                                 </select>
-                                @error('currency')
+                                @error($locale.'_currency')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -531,270 +544,270 @@
                                     <div class="accordion-body">
                                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_1" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_1') border-danger @enderror"
-                                    name="variant_name_1" value="{{ old('variant_name_1') }}" id="variant_name_1">
-                                @error('variant_name_1')
+                                <label for="{{$locale}}_variant_name_1" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_1') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_1" value="{{ old($locale.'_variant_name_1') }}" id="{{$locale}}_variant_name_1">
+                                @error($locale.'_variant_name_1')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_1" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_1') border-danger @enderror"
-                                    name="variant_price_1" value="{{ old('variant_price_1') }}" id="variant_price_1">
-                                @error('variant_price_1')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_2" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_2') border-danger @enderror"
-                                    name="variant_name_2" value="{{ old('variant_name_2') }}" id="variant_name_2">
-                                @error('variant_name_2')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_2" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_2') border-danger @enderror"
-                                    name="variant_price_2" value="{{ old('variant_price_2') }}" id="variant_price_2">
-                                @error('variant_price_2')
+                                <label for="{{$locale}}_variant_price_1" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_1') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_1" value="{{ old($locale.'_variant_price_1') }}" id="{{$locale}}_variant_price_1">
+                                @error($locale.'_variant_price_1')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_3" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_3') border-danger @enderror"
-                                    name="variant_name_3" value="{{ old('variant_name_3') }}" id="variant_name_3">
-                                @error('variant_name_3')
+                                <label for="{{$locale}}_variant_name_2" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_2') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_2" value="{{ old($locale.'_variant_name_2') }}" id="{{$locale}}_variant_name_2">
+                                @error($locale.'_variant_name_2')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_3" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_3') border-danger @enderror"
-                                    name="variant_price_3" value="{{ old('variant_price_3') }}" id="variant_price_3">
-                                @error('variant_price_3')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_4" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_4') border-danger @enderror"
-                                    name="variant_name_4" value="{{ old('variant_name_4') }}" id="variant_name_4">
-                                @error('variant_name_4')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_4" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_4') border-danger @enderror"
-                                    name="variant_price_4" value="{{ old('variant_price_4') }}" id="variant_price_4">
-                                @error('variant_price_4')
+                                <label for="{{$locale}}_variant_price_2" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_2') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_2" value="{{ old($locale.'_variant_price_2') }}" id="{{$locale}}_variant_price_2">
+                                @error($locale.'_variant_price_2')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_5" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_5') border-danger @enderror"
-                                    name="variant_name_5" value="{{ old('variant_name_5') }}" id="variant_name_5">
-                                @error('variant_name_5')
+                                <label for="{{$locale}}_variant_name_3" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_3') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_3" value="{{ old($locale.'_variant_name_3') }}" id="{{$locale}}_variant_name_3">
+                                @error($locale.'_variant_name_3')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_5" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_5') border-danger @enderror"
-                                    name="variant_price_5" value="{{ old('variant_price_5') }}" id="variant_price_5">
-                                @error('variant_price_5')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_6" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_6') border-danger @enderror"
-                                    name="variant_name_6" value="{{ old('variant_name_6') }}" id="variant_name_6">
-                                @error('variant_name_6')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_6" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_6') border-danger @enderror"
-                                    name="variant_price_6" value="{{ old('variant_price_6') }}" id="variant_price_6">
-                                @error('variant_price_6')
+                                <label for="{{$locale}}_variant_price_3" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_3') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_3" value="{{ old($locale.'_variant_price_3') }}" id="{{$locale}}_variant_price_3">
+                                @error($locale.'_variant_price_3')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_7" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_7') border-danger @enderror"
-                                    name="variant_name_7" value="{{ old('variant_name_7') }}" id="variant_name_7">
-                                @error('variant_name_7')
+                                <label for="{{$locale}}_variant_name_4" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_4') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_4" value="{{ old($locale.'_variant_name_4') }}" id="{{$locale}}_variant_name_4">
+                                @error($locale.'_variant_name_4')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_7" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_7') border-danger @enderror"
-                                    name="variant_price_7" value="{{ old('variant_price_7') }}" id="variant_price_7">
-                                @error('variant_price_7')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_8" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_8') border-danger @enderror"
-                                    name="variant_name_8" value="{{ old('variant_name_8') }}" id="variant_name_8">
-                                @error('variant_name_8')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_8" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_8') border-danger @enderror"
-                                    name="variant_price_8" value="{{ old('variant_price_8') }}" id="variant_price_8">
-                                @error('variant_price_8')
+                                <label for="{{$locale}}_variant_price_4" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_4') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_4" value="{{ old($locale.'_variant_price_4') }}" id="{{$locale}}_variant_price_4">
+                                @error($locale.'_variant_price_4')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_9" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_9') border-danger @enderror"
-                                    name="variant_name_9" value="{{ old('variant_name_9') }}" id="variant_name_9">
-                                @error('variant_name_9')
+                                <label for="{{$locale}}_variant_name_5" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_5') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_5" value="{{ old($locale.'_variant_name_5') }}" id="{{$locale}}_variant_name_5">
+                                @error($locale.'_variant_name_5')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_9" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_9') border-danger @enderror"
-                                    name="variant_price_9" value="{{ old('variant_price_9') }}" id="variant_price_9">
-                                @error('variant_price_9')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_10" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_10') border-danger @enderror"
-                                    name="variant_name_10" value="{{ old('variant_name_10') }}" id="variant_name_10">
-                                @error('variant_name_10')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_10" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_10') border-danger @enderror"
-                                    name="variant_price_10" value="{{ old('variant_price_10') }}" id="variant_price_10">
-                                @error('variant_price_10')
+                                <label for="{{$locale}}_variant_price_5" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_5') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_5" value="{{ old($locale.'_variant_price_5') }}" id="{{$locale}}_variant_price_5">
+                                @error($locale.'_variant_price_5')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_11" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_11') border-danger @enderror"
-                                    name="variant_name_11" value="{{ old('variant_name_11') }}" id="variant_name_11">
-                                @error('variant_name_11')
+                                <label for="{{$locale}}_variant_name_6" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_6') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_6" value="{{ old($locale.'_variant_name_6') }}" id="{{$locale}}_variant_name_6">
+                                @error($locale.'_variant_name_6')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_11" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_11') border-danger @enderror"
-                                    name="variant_price_11" value="{{ old('variant_price_11') }}" id="variant_price_11">
-                                @error('variant_price_11')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_12" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_12') border-danger @enderror"
-                                    name="variant_name_12" value="{{ old('variant_name_12') }}" id="variant_name_12">
-                                @error('variant_name_12')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_12" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_12') border-danger @enderror"
-                                    name="variant_price_12" value="{{ old('variant_price_12') }}" id="variant_price_12">
-                                @error('variant_price_12')
+                                <label for="{{$locale}}_variant_price_6" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_6') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_6" value="{{ old($locale.'_variant_price_6') }}" id="{{$locale}}_variant_price_6">
+                                @error($locale.'_variant_price_6')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_13" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_13') border-danger @enderror"
-                                    name="variant_name_13" value="{{ old('variant_name_13') }}" id="variant_name_13">
-                                @error('variant_name_13')
+                                <label for="{{$locale}}_variant_name_7" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_7') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_7" value="{{ old($locale.'_variant_name_7') }}" id="{{$locale}}_variant_name_7">
+                                @error($locale.'_variant_name_7')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_13" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_13') border-danger @enderror"
-                                    name="variant_price_13" value="{{ old('variant_price_13') }}" id="variant_price_13">
-                                @error('variant_price_13')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="variant_name_14" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_14') border-danger @enderror"
-                                    name="variant_name_14" value="{{ old('variant_name_14') }}" id="variant_name_14">
-                                @error('variant_name_14')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="variant_price_14" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_14') border-danger @enderror"
-                                    name="variant_price_14" value="{{ old('variant_price_14') }}" id="variant_price_14">
-                                @error('variant_price_14')
+                                <label for="{{$locale}}_variant_price_7" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_7') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_7" value="{{ old($locale.'_variant_price_7') }}" id="{{$locale}}_variant_price_7">
+                                @error($locale.'_variant_price_7')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="variant_name_15" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_15') border-danger @enderror"
-                                    name="variant_name_15" value="{{ old('variant_name_15') }}" id="variant_name_15">
-                                @error('variant_name_15')
+                                <label for="{{$locale}}_variant_name_8" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_8') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_8" value="{{ old($locale.'_variant_name_8') }}" id="{{$locale}}_variant_name_8">
+                                @error($locale.'_variant_name_8')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="variant_price_15" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('variant_price_15') border-danger @enderror"
-                                    name="variant_price_15" value="{{ old('variant_price_15') }}" id="variant_price_15">
-                                @error('variant_price_15')
+                                <label for="{{$locale}}_variant_price_8" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_8') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_8" value="{{ old($locale.'_variant_price_8') }}" id="{{$locale}}_variant_price_8">
+                                @error($locale.'_variant_price_8')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_9" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_9') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_9" value="{{ old($locale.'_variant_name_9') }}" id="{{$locale}}_variant_name_9">
+                                @error($locale.'_variant_name_9')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_9" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_9') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_9" value="{{ old($locale.'_variant_price_9') }}" id="{{$locale}}_variant_price_9">
+                                @error($locale.'_variant_price_9')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_10" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_10') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_10" value="{{ old($locale.'_variant_name_10') }}" id="{{$locale}}_variant_name_10">
+                                @error($locale.'_variant_name_10')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_10" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_10') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_10" value="{{ old($locale.'_variant_price_10') }}" id="{{$locale}}_variant_price_10">
+                                @error($locale.'_variant_price_10')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_11" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_11') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_11" value="{{ old($locale.'_variant_name_11') }}" id="{{$locale}}_variant_name_11">
+                                @error($locale.'_variant_name_11')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_11" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_11') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_11" value="{{ old($locale.'_variant_price_11') }}" id="{{$locale}}_variant_price_11">
+                                @error($locale.'_variant_price_11')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_12" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_12') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_12" value="{{ old($locale.'_variant_name_12') }}" id="{{$locale}}_variant_name_12">
+                                @error($locale.'_variant_name_12')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_12" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_12') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_12" value="{{ old($locale.'_variant_price_12') }}" id="{{$locale}}_variant_price_12">
+                                @error($locale.'_variant_price_12')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_13" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_13') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_13" value="{{ old($locale.'_variant_name_13') }}" id="{{$locale}}_variant_name_13">
+                                @error($locale.'_variant_name_13')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_13" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_13') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_13" value="{{ old($locale.'_variant_price_13') }}" id="{{$locale}}_variant_price_13">
+                                @error($locale.'_variant_price_13')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_14" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_14') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_14" value="{{ old($locale.'_variant_name_14') }}" id="{{$locale}}_variant_name_14">
+                                @error($locale.'_variant_name_14')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_14" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_14') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_14" value="{{ old($locale.'_variant_price_14') }}" id="{{$locale}}_variant_price_14">
+                                @error($locale.'_variant_price_14')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_name_15" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error($locale.'_variant_name_15') border-danger @enderror"
+                                    name="{{$locale}}_variant_name_15" value="{{ old($locale.'_variant_name_15') }}" id="{{$locale}}_variant_name_15">
+                                @error($locale.'_variant_name_15')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="{{$locale}}_variant_price_15" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error($locale.'_variant_price_15') border-danger @enderror"
+                                    name="{{$locale}}_variant_price_15" value="{{ old($locale.'_variant_price_15') }}" id="{{$locale}}_variant_price_15">
+                                @error($locale.'_variant_price_15')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -806,20 +819,20 @@
                         
                         <hr>
                         <div class="mb-3">
-                            <label for="contents" class="form-label">Menü İçeriği</label>
-                            <textarea class="form-control ck-editor1 @error('contents') border-danger @enderror" name="contents" id="contents"
+                            <label for="{{$locale}}_contents" class="form-label">Menü İçeriği</label>
+                            <textarea class="form-control ck-editor1 @error($locale.'_contents') border-danger @enderror" name="{{$locale}}_contents" id="{{$locale}}_contents"
                                 style="height: 200px;">
-                           {{ old('contents') }}
+                           {{ old($locale.'_contents') }}
                         </textarea>
-                            @error('contents')
+                            @error($locale.'_contents')
                                 <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="allergens" class="form-label">Alerjenler</label>
-                            <textarea class="form-control ck-editor2  @error('allergens') border-danger @enderror" name="allergens"
-                                id="allergens" style="height: 200px;">
-                           {{ old('allergens') }}
+                            <label for="{{$locale}}_allergens" class="form-label">Alerjenler</label>
+                            <textarea class="form-control ck-editor2  @error($locale.'_allergens') border-danger @enderror" name="{{$locale}}_allergens"
+                                id="{{$locale}}_allergens" style="height: 200px;">
+                           {{ old($locale.'_allergens') }}
                         </textarea>
                         </div>
                         <div class="mb-3">
@@ -856,11 +869,11 @@
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-12">
-                                <label for="update_name" class="form-label">Ürün Adı</label>
-                                <input type="text" name="update_name"
-                                    class="form-control @error('update_name') border-danger @enderror" id="update_name"
-                                    value="{{ old('update_name') }}" required>
-                                @error('update_name')
+                                <label for="update_{{$locale}}_name" class="form-label">Ürün Adı</label>
+                                <input type="text" name="update_{{$locale}}_name"
+                                    class="form-control @error('update_'.$locale.'_name') border-danger @enderror" id="update_{{$locale}}_name"
+                                    value="{{ old('update_'.$locale.'_name') }}" required>
+                                @error('update_'.$locale.'_name')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -896,22 +909,22 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="price" class="form-label">Fiyat</label>
-                                <input type="text" class="form-control @error('update_price') border-danger @enderror"
-                                    name="update_price" value="{{ old('update_price') }}" id="update_price">
-                                @error('update_price')
+                                <label for="update_{{$locale}}_price" class="form-label">Fiyat</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_price') border-danger @enderror"
+                                    name="update_{{$locale}}_price" value="{{ old('update_'.$locale.'_price') }}" id="update_{{$locale}}_price">
+                                @error('update_'.$locale.'_price')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_currency" class="form-label">Para Birimi</label>
-                                <select class="form-select @error('update_currency') border-danger @enderror"
-                                    name="update_currency" id="update_currency" required>
+                                <label for="update_{{$locale}}_currency" class="form-label">Para Birimi</label>
+                                <select class="form-select @error('update_'.$locale.'_currency') border-danger @enderror"
+                                    name="update_{{$locale}}_currency" id="update_{{$locale}}_currency" required>
                                     <option value="₺">₺</option>
                                     <option value="$">$</option>
                                     <option value="$">€</option>
                                 </select>
-                                @error('update_currency')
+                                @error('update_'.$locale.'_currency')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -928,270 +941,270 @@
                                     <div class="accordion-body">
                                           <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_1" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_1') border-danger @enderror"
-                                    name="update_variant_name_1" value="{{ old('update_variant_name_1') }}" id="update_variant_name_1">
-                                @error('update_variant_name_1')
+                                <label for="update_{{$locale}}_variant_name_1" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_1') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_1" value="{{ old('update_'.$locale.'_variant_name_1') }}" id="update_{{$locale}}_variant_name_1">
+                                @error('update_'.$locale.'_variant_name_1')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_1" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_1') border-danger @enderror"
-                                    name="update_variant_price_1" value="{{ old('update_variant_price_1') }}" id="update_variant_price_1">
-                                @error('update_variant_price_1')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_2" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_2') border-danger @enderror"
-                                    name="update_variant_name_2" value="{{ old('update_variant_name_2') }}" id="update_variant_name_2">
-                                @error('update_variant_name_2')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_2" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_2') border-danger @enderror"
-                                    name="update_variant_price_2" value="{{ old('update_variant_price_2') }}" id="update_variant_price_2">
-                                @error('update_variant_price_2')
+                                <label for="update_{{$locale}}_variant_price_1" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_1') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_1" value="{{ old('update_'.$locale.'_variant_price_1') }}" id="update_{{$locale}}_variant_price_1">
+                                @error('update_'.$locale.'_variant_price_1')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_3" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_3') border-danger @enderror"
-                                    name="update_variant_name_3" value="{{ old('update_variant_name_3') }}" id="update_variant_name_3">
-                                @error('update_variant_name_3')
+                                <label for="update_{{$locale}}_variant_name_2" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_2') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_2" value="{{ old('update_'.$locale.'_variant_name_2') }}" id="update_{{$locale}}_variant_name_2">
+                                @error('update_'.$locale.'_variant_name_2')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_3" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_3') border-danger @enderror"
-                                    name="update_variant_price_3" value="{{ old('update_variant_price_3') }}" id="update_variant_price_3">
-                                @error('update_variant_price_3')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_4" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('variant_name_4') border-danger @enderror"
-                                    name="update_variant_name_4" value="{{ old('update_variant_name_4') }}" id="update_variant_name_4">
-                                @error('update_variant_name_4')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_4" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_4') border-danger @enderror"
-                                    name="update_variant_price_4" value="{{ old('update_variant_price_4') }}" id="update_variant_price_4">
-                                @error('update_variant_price_4')
+                                <label for="update_{{$locale}}_variant_price_2" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_2') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_2" value="{{ old('update_'.$locale.'_variant_price_2') }}" id="update_{{$locale}}_variant_price_2">
+                                @error('update_'.$locale.'_variant_price_2')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_5" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_5') border-danger @enderror"
-                                    name="update_variant_name_5" value="{{ old('update_variant_name_5') }}" id="update_variant_name_5">
-                                @error('variant_name_5')
+                                <label for="update_{{$locale}}_variant_name_3" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_3') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_3" value="{{ old('update_'.$locale.'_variant_name_3') }}" id="update_{{$locale}}_variant_name_3">
+                                @error('update_'.$locale.'_variant_name_3')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_5" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_5') border-danger @enderror"
-                                    name="update_variant_price_5" value="{{ old('update_variant_price_5') }}" id="update_variant_price_5">
-                                @error('update_variant_price_5')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_6" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_6') border-danger @enderror"
-                                    name="update_variant_name_6" value="{{ old('update_variant_name_6') }}" id="update_variant_name_6">
-                                @error('update_variant_name_6')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_6" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_6') border-danger @enderror"
-                                    name="update_variant_price_6" value="{{ old('update_variant_price_6') }}" id="update_variant_price_6">
-                                @error('update_variant_price_6')
+                                <label for="update_{{$locale}}_variant_price_3" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_3') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_3" value="{{ old('update_'.$locale.'_variant_price_3') }}" id="update_{{$locale}}_variant_price_3">
+                                @error('update_'.$locale.'_variant_price_3')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_7" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_7') border-danger @enderror"
-                                    name="update_variant_name_7" value="{{ old('update_variant_name_7') }}" id="update_variant_name_7">
-                                @error('update_variant_name_7')
+                                <label for="update_{{$locale}}_variant_name_4" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_4') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_4" value="{{ old('update_'.$locale.'_variant_name_4') }}" id="update_{{$locale}}_variant_name_4">
+                                @error('update_'.$locale.'_variant_name_4')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_7" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_7') border-danger @enderror"
-                                    name="update_variant_price_7" value="{{ old('update_variant_price_7') }}" id="update_variant_price_7">
-                                @error('update_variant_price_7')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_8" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_8') border-danger @enderror"
-                                    name="update_variant_name_8" value="{{ old('update_variant_name_8') }}" id="update_variant_name_8">
-                                @error('update_variant_name_8')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_8" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_8') border-danger @enderror"
-                                    name="update_variant_price_8" value="{{ old('update_variant_price_8') }}" id="update_variant_price_8">
-                                @error('update_variant_price_8')
+                                <label for="update_{{$locale}}_variant_price_4" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_4') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_4" value="{{ old('update_'.$locale.'_variant_price_4') }}" id="update_{{$locale}}_variant_price_4">
+                                @error('update_'.$locale.'_variant_price_4')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_9" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_9') border-danger @enderror"
-                                    name="update_variant_name_9" value="{{ old('update_variant_name_9') }}" id="update_variant_name_9">
-                                @error('update_variant_name_9')
+                                <label for="update_{{$locale}}_variant_name_5" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_5') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_5" value="{{ old('update_'.$locale.'_variant_name_5') }}" id="update_{{$locale}}_variant_name_5">
+                                @error('update_'.$locale.'_variant_name_5')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_9" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_9') border-danger @enderror"
-                                    name="update_variant_price_9" value="{{ old('update_variant_price_9') }}" id="update_variant_price_9">
-                                @error('update_variant_price_9')
+                                <label for="update_{{$locale}}_variant_price_5" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_5') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_5" value="{{ old('update_'.$locale.'_variant_price_5') }}" id="update_{{$locale}}_variant_price_5">
+                                @error('update_'.$locale.'_variant_price_5')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_6" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_6') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_6" value="{{ old('update_'.$locale.'_variant_name_6') }}" id="update_{{$locale}}_variant_name_6">
+                                @error('update_'.$locale.'_variant_name_6')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_6" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_6') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_6" value="{{ old('update_'.$locale.'_variant_price_6') }}" id="update_{{$locale}}_variant_price_6">
+                                @error('update_'.$locale.'_variant_price_6')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_7" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_7') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_7" value="{{ old('update_'.$locale.'_variant_name_7') }}" id="update_{{$locale}}_variant_name_7">
+                                @error('update_'.$locale.'_variant_name_7')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_7" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_7') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_7" value="{{ old('update_'.$locale.'_variant_price_7') }}" id="update_{{$locale}}_variant_price_7">
+                                @error('update_'.$locale.'_variant_price_7')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_8" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_8') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_8" value="{{ old('update_'.$locale.'_variant_name_8') }}" id="update_{{$locale}}_variant_name_8">
+                                @error('update_'.$locale.'_variant_name_8')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_8" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_8') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_8" value="{{ old('update_'.$locale.'_variant_price_8') }}" id="update_{{$locale}}_variant_price_8">
+                                @error('update_'.$locale.'_variant_price_8')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_9" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_9') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_9" value="{{ old('update_'.$locale.'_variant_name_9') }}" id="update_{{$locale}}_variant_name_9">
+                                @error('update_'.$locale.'_variant_name_9')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_9" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_9') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_9" value="{{ old('update_'.$locale.'_variant_price_9') }}" id="update_{{$locale}}_variant_price_9">
+                                @error('update_'.$locale.'_variant_price_9')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                          <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_10" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_10') border-danger @enderror"
-                                    name="update_variant_name_10" value="{{ old('update_variant_name_10') }}" id="update_variant_name_10">
-                                @error('update_variant_name_10')
+                                <label for="update_{{$locale}}_variant_name_10" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_10') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_10" value="{{ old('update_'.$locale.'_variant_name_10') }}" id="update_{{$locale}}_variant_name_10">
+                                @error('update_'.$locale.'_variant_name_10')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_10" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_10') border-danger @enderror"
-                                    name="update_variant_price_10" value="{{ old('update_variant_price_10') }}" id="update_variant_price_10">
-                                @error('update_variant_price_10')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_11" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_11') border-danger @enderror"
-                                    name="update_variant_name_11" value="{{ old('update_variant_name_11') }}" id="update_variant_name_11">
-                                @error('update_variant_name_11')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_11" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_11') border-danger @enderror"
-                                    name="update_variant_price_11" value="{{ old('update_variant_price_11') }}" id="update_variant_price_11">
-                                @error('update_variant_price_11')
+                                <label for="update_{{$locale}}_variant_price_10" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_10') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_10" value="{{ old('update_'.$locale.'_variant_price_10') }}" id="update_{{$locale}}_variant_price_10">
+                                @error('update_'.$locale.'_variant_price_10')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_12" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_12') border-danger @enderror"
-                                    name="update_variant_name_12" value="{{ old('update_variant_name_12') }}" id="update_variant_name_12">
-                                @error('update_variant_name_12')
+                                <label for="update_{{$locale}}_variant_name_11" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_11') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_11" value="{{ old('update_'.$locale.'_variant_name_11') }}" id="update_{{$locale}}_variant_name_11">
+                                @error('update_'.$locale.'_variant_name_11')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_12" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_12') border-danger @enderror"
-                                    name="update_variant_price_12" value="{{ old('update_variant_price_12') }}" id="update_variant_price_12">
-                                @error('update_variant_price_12')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="update_variant_name_13" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_13') border-danger @enderror"
-                                    name="update_variant_name_13" value="{{ old('update_variant_name_13') }}" id="update_variant_name_13">
-                                @error('update_variant_name_13')
-                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-6">
-                                <label for="update_variant_price_13" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_13') border-danger @enderror"
-                                    name="update_variant_price_13" value="{{ old('update_variant_price_13') }}" id="update_variant_price_13">
-                                @error('update_variant_price_13')
+                                <label for="update_{{$locale}}_variant_price_11" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_11') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_11" value="{{ old('update_'.$locale.'_variant_price_11') }}" id="update_{{$locale}}_variant_price_11">
+                                @error('update_'.$locale.'_variant_price_11')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_14" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_14') border-danger @enderror"
-                                    name="update_variant_name_14" value="{{ old('update_variant_name_14') }}" id="update_variant_name_14">
-                                @error('update_variant_name_14')
+                                <label for="update_{{$locale}}_variant_name_12" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_12') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_12" value="{{ old('update_'.$locale.'_variant_name_12') }}" id="update_{{$locale}}_variant_name_12">
+                                @error('update_'.$locale.'_variant_name_12')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_14" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_14') border-danger @enderror"
-                                    name="update_variant_price_14" value="{{ old('update_variant_price_14') }}" id="update_variant_price_14">
-                                @error('update_variant_price_14')
+                                <label for="update_{{$locale}}_variant_price_12" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_12') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_12" value="{{ old('update_'.$locale.'_variant_price_12') }}" id="update_{{$locale}}_variant_price_12">
+                                @error('update_'.$locale.'_variant_price_12')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="update_variant_name_15" class="form-label">Varyant Adı</label>
-                                <input type="text" class="form-control @error('update_variant_name_15') border-danger @enderror"
-                                    name="update_variant_name_15" value="{{ old('update_variant_name_15') }}" id="update_variant_name_15">
-                                @error('update_variant_name_15')
+                                <label for="update_{{$locale}}_variant_name_13" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_13') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_13" value="{{ old('update_'.$locale.'_variant_name_13') }}" id="update_{{$locale}}_variant_name_13">
+                                @error('update_'.$locale.'_variant_name_13')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-6">
-                                <label for="update_variant_price_15" class="form-label">Varyant Fiyatı</label>
-                                <input type="number" class="form-control @error('update_variant_price_15') border-danger @enderror"
-                                    name="update_variant_price_15" value="{{ old('update_variant_price_15') }}" id="update_variant_price_15">
-                                @error('update_variant_price_15')
+                                <label for="update_{{$locale}}_variant_price_13" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_13') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_13" value="{{ old('update_'.$locale.'_variant_price_13') }}" id="update_{{$locale}}_variant_price_13">
+                                @error('update_'.$locale.'_variant_price_13')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_14" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_14') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_14" value="{{ old('update_'.$locale.'_variant_name_14') }}" id="update_{{$locale}}_variant_name_14">
+                                @error('update_'.$locale.'_variant_name_14')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_14" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_14') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_14" value="{{ old('update_'.$locale.'_variant_price_14') }}" id="update_{{$locale}}_variant_price_14">
+                                @error('update_'.$locale.'_variant_price_14')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_name_15" class="form-label">Varyant Adı</label>
+                                <input type="text" class="form-control @error('update_'.$locale.'_variant_name_15') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_name_15" value="{{ old('update_'.$locale.'_variant_name_15') }}" id="update_{{$locale}}_variant_name_15">
+                                @error('update_'.$locale.'_variant_name_15')
+                                    <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="update_{{$locale}}_variant_price_15" class="form-label">Varyant Fiyatı</label>
+                                <input type="number" class="form-control @error('update_'.$locale.'_variant_price_15') border-danger @enderror"
+                                    name="update_{{$locale}}_variant_price_15" value="{{ old('update_'.$locale.'_variant_price_15') }}" id="update_{{$locale}}_variant_price_15">
+                                @error('update_'.$locale.'_variant_price_15')
                                     <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -1203,20 +1216,20 @@
                         
                         <hr>
                         <div class="mb-3">
-                            <label for="update_contents" class="form-label">Menü İçeriği</label>
-                            <textarea class="form-control ck-editor3 @error('update_contents') border-danger @enderror" name="update_contents"
-                                id="update_contents" style="height: 200px;">
-                                    {{ old('update_contents') }}
+                            <label for="update_{{$locale}}_contents" class="form-label">Menü İçeriği</label>
+                            <textarea class="form-control ck-editor3 @error('update_'.$locale.'_contents') border-danger @enderror" name="update_{{$locale}}_contents"
+                                id="update_{{$locale}}_contents" style="height: 200px;">
+                                    {{ old('update_'.$locale.'_contents') }}
                             </textarea>
-                            @error('update_contents')
+                            @error('update_'.$locale.'_contents')
                                 <div class="invalid-feedback d-block text-danger f-11">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-3">
-                            <label for="update_allergens" class="form-label">Alerjenler</label>
-                            <textarea class="form-control ck-editor4  @error('update_allergens') border-danger @enderror" name="update_allergens"
-                                id="update_allergens" style="height: 200px;">
-                           {{ old('update_allergens') }}
+                            <label for="update_{{$locale}}_allergens" class="form-label">Alerjenler</label>
+                            <textarea class="form-control ck-editor4  @error('update_'.$locale.'_allergens') border-danger @enderror" name="update_{{$locale}}_allergens"
+                                id="update_{{$locale}}_allergens" style="height: 200px;">
+                           {{ old('update_'.$locale.'_allergens') }}
                         </textarea>
                         </div>
                         <div class="mb-3">
@@ -1568,7 +1581,7 @@
                 if (response.success) {
                     console.log('Başarılı:', response.message);
                     document.querySelector(`tr[data-id="${productId}"] .productPriceText`)
-                        .textContent = `${response.product.price} ${response.product.currency}`;
+                        .textContent = `${response.product.price?.{{$locale}}} ${response.product.currency?.{{$locale}}}`;
                 } else {
                     console.error('Başarısız:', response.message);
                 }
@@ -1596,7 +1609,7 @@
                 if (response.success) {
                     console.log('Başarılı:', response.message);
                     document.querySelector(`tr[data-id="${productId}"] .productNameText`)
-                        .textContent = response.product.name;
+                        .textContent = response.product.name?.{{$locale}};
                 } else {
                     console.error('Başarısız:', response.message);
                 }
@@ -1747,41 +1760,41 @@ function updateCategory(newCategoryId, productId) {
                     id: id
                 },
                 success: function(response) {
-                    $('#update_name').val(response.product.name);
-                    $('#update_price').val(response.product.price);
-                    $('#update_currency').val(response.product.currency);
-                    $('#update_variant_name_1').val(response.product.variant_name_1);
-                    $('#update_variant_price_1').val(response.product.variant_price_1);
-                    $('#update_variant_name_2').val(response.product.variant_name_2);
-                    $('#update_variant_price_2').val(response.product.variant_price_2);
-                    $('#update_variant_name_3').val(response.product.variant_name_3);
-                    $('#update_variant_price_3').val(response.product.variant_price_3);
-                    $('#update_variant_name_4').val(response.product.variant_name_4);
-                    $('#update_variant_price_4').val(response.product.variant_price_4);
-                    $('#update_variant_name_5').val(response.product.variant_name_5);
-                    $('#update_variant_price_5').val(response.product.variant_price_5);
-                    $('#update_variant_name_6').val(response.product.variant_name_6);
-                    $('#update_variant_price_6').val(response.product.variant_price_6);
-                    $('#update_variant_name_7').val(response.product.variant_name_7);
-                    $('#update_variant_price_7').val(response.product.variant_price_7);
-                    $('#update_variant_name_8').val(response.product.variant_name_8);
-                    $('#update_variant_price_8').val(response.product.variant_price_8);
-                    $('#update_variant_name_9').val(response.product.variant_name_9);
-                    $('#update_variant_price_9').val(response.product.variant_price_9);
-                    $('#update_variant_name_10').val(response.product.variant_name_10);
-                    $('#update_variant_price_10').val(response.product.variant_price_10);
-                    $('#update_variant_name_11').val(response.product.variant_name_11);
-                    $('#update_variant_price_11').val(response.product.variant_price_11);
-                    $('#update_variant_name_12').val(response.product.variant_name_12);
-                    $('#update_variant_price_12').val(response.product.variant_price_12);
-                    $('#update_variant_name_13').val(response.product.variant_name_13);
-                    $('#update_variant_price_13').val(response.product.variant_price_13);
-                    $('#update_variant_name_14').val(response.product.variant_name_14);
-                    $('#update_variant_price_14').val(response.product.variant_price_14);
-                    $('#update_variant_name_15').val(response.product.variant_name_15);
-                    $('#update_variant_price_15').val(response.product.variant_price_15);
-                    editor.setData(response.product.contents ?? '');
-                    editor2.setData(response.product.allergens ?? '');
+                    $('#update_{{$locale}}_name').val(response.product.name.{{$locale}});
+                    $('#update_{{$locale}}_price').val(response.product.price.{{$locale}});
+                    $('#update_{{$locale}}_currency').val(response.product.currency.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_1').val(response.product.variant_name_1?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_1').val(response.product.variant_price_1?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_2').val(response.product.variant_name_2?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_2').val(response.product.variant_price_2?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_3').val(response.product.variant_name_3?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_3').val(response.product.variant_price_3?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_4').val(response.product.variant_name_4?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_4').val(response.product.variant_price_4?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_5').val(response.product.variant_name_5?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_5').val(response.product.variant_price_5?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_6').val(response.product.variant_name_6?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_6').val(response.product.variant_price_6?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_7').val(response.product.variant_name_7?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_7').val(response.product.variant_price_7?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_8').val(response.product.variant_name_8?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_8').val(response.product.variant_price_8?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_9').val(response.product.variant_name_9?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_9').val(response.product.variant_price_9?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_10').val(response.product.variant_name_10?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_10').val(response.product.variant_price_10?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_11').val(response.product.variant_name_11?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_11').val(response.product.variant_price_11?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_12').val(response.product.variant_name_12?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_12').val(response.product.variant_price_12?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_13').val(response.product.variant_name_13?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_13').val(response.product.variant_price_13?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_14').val(response.product.variant_name_14?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_14').val(response.product.variant_price_14?.{{$locale}});
+                    $('#update_{{$locale}}_variant_name_15').val(response.product.variant_name_15?.{{$locale}});
+                    $('#update_{{$locale}}_variant_price_15').val(response.product.variant_price_15?.{{$locale}});
+                    editor.setData(response.product.contents.{{$locale}} ?? '');
+                    editor2.setData(response.product.allergens.{{$locale}} ?? '');
                     
                     var categorySelect = $('#update_categorie_id').select2();
                     categorySelect.find('option').each(function() {
@@ -1802,6 +1815,23 @@ function updateCategory(newCategoryId, productId) {
             Swal.fire({
                 title: 'Dikkat',
                 text: 'Ürünü silmek istediğinizden emin misiniz?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, Sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        }
+
+        function deleteImage(url) {
+            Swal.fire({
+                title: 'Dikkat',
+                text: 'Ürün resmini silmek istediğinizden emin misiniz?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',

@@ -97,6 +97,88 @@
                                         title="Yazı Rengi Seçin">
                                 </div>
                             </div>
+                            <hr>
+                            <div class="mb-4">
+                                <label for="call_button_color" class="form-label fw-bold">Ara Buton Rengi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-palette2"></i>
+                                    </span>
+                                    <input 
+                                        class="form-control form-control-color" 
+                                        type="color" 
+                                        id="call_button_color" 
+                                        name="call_button_color"
+                                        value="{{ old('call_button_color') ?? auth()->user()->account->call_button_color }}" 
+                                        title="Buton Rengi Seçin">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="whatsapp_button_color" class="form-label fw-bold">Whatsapp Buton Rengi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-palette2"></i>
+                                    </span>
+                                    <input 
+                                        class="form-control form-control-color" 
+                                        type="color" 
+                                        id="whatsapp_button_color" 
+                                        name="whatsapp_button_color"
+                                        value="{{ old('whatsapp_button_color') ?? auth()->user()->account->whatsapp_button_color }}" 
+                                        title="Buton Rengi Seçin">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="map_button_color" class="form-label fw-bold">Yol Tarifi Buton Rengi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-palette2"></i>
+                                    </span>
+                                    <input 
+                                        class="form-control form-control-color" 
+                                        type="color" 
+                                        id="map_button_color" 
+                                        name="map_button_color"
+                                        value="{{ old('map_button_color') ?? auth()->user()->account->map_button_color }}" 
+                                        title="Buton Rengi Seçin">
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-4">
+                                <label for="logo_width" class="form-label fw-bold">Logo Boyutu (px)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-123"></i>
+                                    </span>
+                                    <input 
+                                        class="form-control" 
+                                        type="number" 
+                                        id="logo_width" 
+                                        name="logo_width"
+                                        value="{{ old('logo_width') ?? auth()->user()->account->logo_width }}" 
+                                        title="Logo Boyutu Giriniz">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="category_logo_width" class="form-label fw-bold">Kategori Logo Boyutu (px)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-123"></i>
+                                    </span>
+                                    <input 
+                                        class="form-control" 
+                                        type="number" 
+                                        id="category_logo_width" 
+                                        name="category_logo_width"
+                                        value="{{ old('category_logo_width') ?? auth()->user()->account->category_logo_width }}" 
+                                        title="Logo Boyutu Giriniz">
+                                </div>
+                            </div>
                         
                             @if ($errors->any())
                                 <div class="alert alert-danger mt-3">

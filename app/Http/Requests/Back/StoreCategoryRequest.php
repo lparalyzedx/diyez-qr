@@ -22,7 +22,7 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
+            app()->getLocale().'_name' => 'required|max:255',
             'image' => 'required|image|mimes:png,jpg,jpeg',
             'categorie_id' => [
                  'nullable',

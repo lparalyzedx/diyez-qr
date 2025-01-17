@@ -54,12 +54,12 @@
 		<div class="v2_forFooter">
 			<div class="v2_header" style="background-color:{{$account->header_color}}">
 				<form method="get" action="{{route('menu',$account->slug)}}" class="v2_src_outer v2_themeColor {{request()->has('search') ? 'v2_src_outer_act' : ''}}">
-					    <input type="text" name="search" placeholder="Birşeyler arayın..." value="{{request()->get('search')}}" style="color:{{$account->text_color}}" required/>
+					    <input type="text" name="search" placeholder="{{__('all.search')}}" value="{{request()->get('search')}}" style="color:{{$account->text_color}}" required/>
 					    <button type="submit" class="v2_themeColor v2_src_action" style="color:{{$account->text_color}}"><i class="icon-loupe"></i></button>
 				</form>
 				<button type="button" class="v2_themeColor v2_src_btn {{request()->has('search') ? 'v2_src_btn_act' : ''}}" style="color:{{$account->text_color}}"><i class="icon-loupe"></i><i class="icon-close-1"></i></button>
-				<a href="{{ route('menu',$account->slug) }}" class="v2_logo {{request()->has('search') ? 'v2_hidden_class' : ''}}">
-					<img src="{{asset('storage/'.$account->logo)}}" />
+				<a href="{{ route('index',$account->slug) }}" class="v2_logo {{request()->has('search') ? 'v2_hidden_class' : ''}}">
+					<img src="{{asset('storage/'.$account->logo)}}" style="width:{{$account->logo_width}}px;" />
 				</a>	
 				<button type="button" class="v2_themeColor v2_menu_btn {{request()->has('search') ? 'v2_hidden_class' : ''}}" style="color:{{$account->text_color}}"><i class="icon-rm"></i><i class="icon-close-1"></i></button>
 			</div>

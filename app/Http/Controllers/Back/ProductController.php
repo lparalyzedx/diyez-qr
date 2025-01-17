@@ -8,7 +8,9 @@ use App\Http\Requests\Back\UpdateProductRequest;
 use App\Http\Requests\Back\StoreProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Categorie;
+use App\Models\Locale;
 use App\Models\Product;
+use App\Services\PriceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -17,32 +19,37 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
+
+    protected $priceService;
+
+    public function __construct(PriceService $priceService)
+    {
+        $this->priceService = $priceService;
+    }
+
     public function index(Request $request)
     {
+        $locale = app()->getLocale();
+
         $query = Product::query()
             ->with("category")
             ->account();
 
-        if ($request->has("category") && $request->category) {
-            $query->whereHas("category", function ($q) use ($request) {
-                $q->where("id", $request->category);
-            });
-        }
+        $filterMap = [
+            "category" => fn($q, $val) => $q->whereHas(
+                "category",
+                fn($q) => $q->where("id", $val)
+            ),
+            "status" => fn($q, $val) => $q->where("status", $val == 2 ? 0 : 1),
+            "price_filter" => fn($q, $val) => $q->orderBy(
+                "price",
+                $val === "big" ? "desc" : "asc"
+            ),
+        ];
 
-        if ($request->has("status") && $request->status) {
-            $query->where("status", $request->status == 2 ? 0 : 1);
-        }
-
-        if ($request->has("price_filter") && $request->price_filter) {
-            $priceFilter = $request->price_filter;
-
-            switch ($priceFilter) {
-                case "big":
-                    $query->orderBy("price", "desc");
-                    break;
-                case "small":
-                    $query->orderBy("price", "asc");
-                    break;
+        foreach ($filterMap as $key => $callback) {
+            if ($request->has($key) && $request->$key) {
+                $callback($query, $request->$key);
             }
         }
 
@@ -55,41 +62,30 @@ class ProductController extends Controller
             ->orderBy("order_id", "asc")
             ->with("childs")
             ->get();
+
+        $baseFields = ["name", "images", "price", "currency", "categorie_id"];
+
+        $variantFields = [];
+        for ($i = 1; $i <= 15; $i++) {
+            $variantFields[] = "variant_name_{$i}";
+            $variantFields[] = "variant_price_{$i}";
+        }
+
         $modals = [
-            "create" => [
-                "name",
-                "images",
-                "price",
-                "currency",
-                "variant_name_1",
-                "variant_price_1",
-                "variant_name_2",
-                "variant_price_2",
-                "variant_name_3",
-                "variant_price_3",
-                "variant_name_4",
-                "variant_price_4",
-                "variant_name_5",
-                "variant_price_5",
-                "categorie_id",
-            ],
-            "edit" => [
-                "update_name",
-                "update_images",
-                "update_price",
-                "update_currency",
-                "update_variant_name_1",
-                "update_variant_price_1",
-                "update_variant_name_2",
-                "update_variant_price_2",
-                "update_variant_name_3",
-                "update_variant_price_3",
-                "update_variant_name_4",
-                "update_variant_price_4",
-                "update_variant_name_5",
-                "update_variant_price_5",
-                "update_categorie_id",
-            ],
+            "create" => array_merge(
+                array_map(
+                    fn($field) => "{$locale}_{$field}",
+                    array_merge($baseFields, $variantFields)
+                ),
+                ["status"]
+            ),
+            "edit" => array_map(
+                fn($field) => "update_{$field}",
+                array_map(
+                    fn($field) => "{$locale}_{$field}",
+                    array_merge($baseFields, $variantFields)
+                )
+            ),
             "import" => ["xlsx"],
             "update_prices" => [
                 "update_type",
@@ -103,13 +99,19 @@ class ProductController extends Controller
 
         return view(
             "back.pages.products.index",
-            compact("products", "categories", "modals")
+            compact("products", "categories", "modals", "locale")
         );
     }
 
     public function store(StoreProductRequest $request)
     {
         $images = $request->file("images") ?? [];
+
+        $locales = Locale::query()
+            ->account()
+            ->pluck("language_code")
+            ->toArray();
+
         $imagePaths = [];
 
         foreach ($images as $file) {
@@ -123,48 +125,67 @@ class ProductController extends Controller
             }
         }
 
-        Product::query()->create([
-            "name" => $request->name,
-            "slug" => Str::slug($request->name),
-            "contents" => $request->contents,
-            "allergens" => $request->allergens,
-            "images" => json_encode($imagePaths),
-            "price" => $request->price,
-            "currency" => $request->currency,
-            "variant_name_1" => $request->variant_name_1,
-            "variant_price_1" => $request->variant_price_1,
-            "variant_name_2" => $request->variant_name_2,
-            "variant_price_2" => $request->variant_price_2,
-            "variant_name_3" => $request->variant_name_3,
-            "variant_price_3" => $request->variant_price_3,
-            "variant_name_4" => $request->variant_name_4,
-            "variant_price_4" => $request->variant_price_4,
-            "variant_name_5" => $request->variant_name_5,
-            "variant_price_5" => $request->variant_price_5,
-            "variant_name_6" => $request->variant_name_6,
-            "variant_price_6" => $request->variant_price_6,
-            "variant_name_7" => $request->variant_name_7,
-            "variant_price_7" => $request->variant_price_7,
-            "variant_name_8" => $request->variant_name_8,
-            "variant_price_8" => $request->variant_price_8,
-            "variant_name_9" => $request->variant_name_9,
-            "variant_price_9" => $request->variant_price_9,
-            "variant_name_10" => $request->variant_name_10,
-            "variant_price_10" => $request->variant_price_10,
-            "variant_name_11" => $request->variant_name_11,
-            "variant_price_11" => $request->variant_price_11,
-            "variant_name_12" => $request->variant_name_12,
-            "variant_price_12" => $request->variant_price_12,
-            "variant_name_13" => $request->variant_name_13,
-            "variant_price_13" => $request->variant_price_13,
-            "variant_name_14" => $request->variant_name_14,
-            "variant_price_14" => $request->variant_price_14,
-            "variant_name_15" => $request->variant_name_15,
-            "variant_price_15" => $request->variant_price_15,
-            "status" => $request->status ? 1 : 0,
-            "categorie_id" => $request->categorie_id,
-            "account_id" => Auth::user()->account->id
-        ]);
+        $fields = [
+            "name",
+            "slug",
+            "price",
+            "currency",
+            "contents",
+            "allergens",
+        ];
+
+        $variants = array_merge(
+            array_map(fn($i) => "variant_name_$i", range(1, 15)),
+            array_map(fn($i) => "variant_price_$i", range(1, 15))
+        );
+
+        $data = [];
+        $defaults = array_fill_keys($fields, null);
+
+        $trData = [];
+        foreach ($fields as $field) {
+            $trData[$field] = $request->input("tr_{$field}");
+        }
+
+        $trSlug = $trData["slug"] ?: Str::slug($trData["name"]);
+
+        $trVariants = [];
+        foreach ($variants as $variant) {
+            $value = $request->input("tr_{$variant}");
+            if (!empty($value)) {
+                $trVariants[$variant] = $value;
+            }
+        }
+
+        foreach ($locales as $locale) {
+            foreach ($fields as $field) {
+                $value = $request->input("{$locale}_{$field}");
+
+                if ($field === "slug") {
+                    $data[$field][$locale] = $trSlug;
+                } else {
+                    $data[$field][$locale] = $value ?: $trData[$field];
+                }
+            }
+        }
+
+        foreach ($variants as $variant) {
+            if (isset($trVariants[$variant])) {
+                $data[$variant] = array_fill_keys(
+                    $locales,
+                    $trVariants[$variant]
+                );
+            }
+        }
+
+        Product::query()->create(
+            array_merge($data, [
+                "images" => json_encode($imagePaths),
+                "status" => $request->status ? 1 : 0,
+                "categorie_id" => $request->categorie_id,
+                "account_id" => Auth::user()->account->id,
+            ])
+        );
 
         return redirect()
             ->back()
@@ -232,65 +253,90 @@ class ProductController extends Controller
             ->account()
             ->where("id", $id)
             ->firstOrFail();
-        $images = $product->images;
-        $imagePaths = [];
 
-        $updateImages = $request->file("update_images");
+        $images = $request->file("update_images") ?? [];
+        $locales = Locale::query()
+            ->account()
+            ->pluck("language_code")
+            ->toArray();
 
-        if ($updateImages) {
-            foreach ($updateImages as $file) {
-                if ($file->isValid()) {
-                    $file_name =
-                        Str::slug($request->name . uniqid()) .
-                        "." .
-                        $file->getClientOriginalExtension();
-                    Storage::putFileAs("products", $file, $file_name);
-                    $imagePaths[] = "products/" . $file_name;
+        $existingImages = json_decode($product->images, true) ?? [];
+        $imagePaths = $existingImages;
+
+        foreach ($images as $file) {
+            if ($file->isValid()) {
+                $file_name =
+                    Str::slug(
+                        $request->input(
+                            "update_" . app()->getLocale() . "_name"
+                        ) . uniqid()
+                    ) .
+                    "." .
+                    $file->getClientOriginalExtension();
+                Storage::putFileAs("products", $file, $file_name);
+                $imagePaths[] = "products/" . $file_name;
+            }
+        }
+
+        $fields = ["name", "price", "currency", "contents", "allergens"];
+        $variants = array_merge(
+            array_map(fn($i) => "variant_name_$i", range(1, 15)),
+            array_map(fn($i) => "variant_price_$i", range(1, 15))
+        );
+
+        $data = [];
+        $currentData = $product->toArray();
+
+        foreach ($fields as $field) {
+            $data[$field] = $currentData[$field];
+        }
+
+        $data["slug"] = $currentData["slug"] ?? array_fill_keys($locales, "");
+
+        foreach ($locales as $locale) {
+            foreach ($fields as $field) {
+                $value = $request->input("update_{$locale}_{$field}");
+                if ($value !== null) {
+                    if (!isset($data[$field])) {
+                        $data[$field] = [];
+                    }
+                    $data[$field][$locale] = $value;
+
+                    if ($field === "name") {
+                        $data["slug"][$locale] = Str::slug($value);
+                    }
                 }
             }
         }
 
-        $product->update([
-            "name" => $request->update_name,
-            "slug" => Str::slug($request->update_name),
-            "contents" => $request->update_contents,
-            "allergens" => $request->update_allergens,
-            "images" => count($imagePaths) > 0 ? json_encode($imagePaths) : $images,
-            "price" => $request->update_price,
-            "currency" => $request->update_currency,
-            "variant_name_1" => $request->update_variant_name_1,
-            "variant_price_1" => $request->update_variant_price_1,
-            "variant_name_2" => $request->update_variant_name_2,
-            "variant_price_2" => $request->update_variant_price_2,
-            "variant_name_3" => $request->update_variant_name_3,
-            "variant_price_3" => $request->update_variant_price_3,
-            "variant_name_4" => $request->update_variant_name_4,
-            "variant_price_4" => $request->update_variant_price_4,
-            "variant_name_5" => $request->update_variant_name_5,
-            "variant_price_5" => $request->update_variant_price_5,
-            "variant_name_6" => $request->update_variant_name_6,
-            "variant_price_6" => $request->update_variant_price_6,
-            "variant_name_7" => $request->update_variant_name_7,
-            "variant_price_7" => $request->update_variant_price_7,
-            "variant_name_8" => $request->update_variant_name_8,
-            "variant_price_8" => $request->update_variant_price_8,
-            "variant_name_9" => $request->update_variant_name_9,
-            "variant_price_9" => $request->update_variant_price_9,
-            "variant_name_10" => $request->update_variant_name_10,
-            "variant_price_10" => $request->update_variant_price_10,
-            "variant_name_11" => $request->update_variant_name_11,
-            "variant_price_11" => $request->update_variant_price_11,
-            "variant_name_12" => $request->update_variant_name_12,
-            "variant_price_12" => $request->update_variant_price_12,
-            "variant_name_13" => $request->update_variant_name_13,
-            "variant_price_13" => $request->update_variant_price_13,
-            "variant_name_14" => $request->update_variant_name_14,
-            "variant_price_14" => $request->update_variant_price_14,
-            "variant_name_15" => $request->update_variant_name_15,
-            "variant_price_15" => $request->update_variant_price_15,
-            "status" => $request->update_status ? 1 : 0,
-            "categorie_id" => $request->update_categorie_id
-        ]);
+        foreach ($variants as $variant) {
+            if (isset($currentData[$variant])) {
+                $data[$variant] = $currentData[$variant];
+            }
+        }
+
+        foreach ($locales as $locale) {
+            foreach ($variants as $variant) {
+                $value = $request->input("update_{$locale}_{$variant}");
+                if ($value !== null) {
+                    if (str_contains($variant, "price")) {
+                        $value = (float) $value;
+                    }
+                    if (!isset($data[$variant])) {
+                        $data[$variant] = [];
+                    }
+                    $data[$variant][$locale] = $value;
+                }
+            }
+        }
+
+        $product->update(
+            array_merge($data, [
+                "images" => json_encode($imagePaths),
+                "status" => $request->update_status ? 1 : 0,
+                "categorie_id" => $request->update_categorie_id,
+            ])
+        );
 
         return redirect()
             ->back()
@@ -321,8 +367,25 @@ class ProductController extends Controller
             ->account()
             ->findOrFail($id);
 
-        $product->price = $request->input("price");
-        $product->save();
+        $prices = $product->getTranslations('price');
+        
+
+
+        if (!is_array($prices)) {
+            $prices = []; 
+        }
+            
+        $locale = app()->getLocale();
+        $newPrice = $request->input("price");
+            
+        if ($newPrice) {
+            $prices[$locale] = $newPrice;
+        }
+
+        $product->update([
+            'price' => $prices
+        ]);
+
 
         return response()->json([
             "success" => true,
@@ -340,8 +403,22 @@ class ProductController extends Controller
         $product = Product::query()
             ->account()
             ->findOrFail($id);
-        $product->name = $request->input("name");
-        $product->save();
+
+        $names = json_decode($product->name, true) ?? [];
+        $slugs = json_decode($product->slug, true) ?? [];
+
+        $locale = app()->getLocale();
+        $newName = $request->input("name");
+
+        if ($newName) {
+            $names[$locale] = $newName;
+            $slugs[$locale] = Str::slug($newName);
+        }
+
+        $product->update([
+            "name" => $names,
+            "slug" => $slugs,
+        ]);
 
         return response()->json([
             "success" => true,
@@ -389,7 +466,6 @@ class ProductController extends Controller
 
     public function import(ImportProductRequest $request)
     {
-
         Excel::import(new ProductImport(), $request->file("xlsx"));
 
         return back()->with(
@@ -410,81 +486,68 @@ class ProductController extends Controller
             "rounding_amount" => "nullable|numeric|min:0",
         ]);
 
-        $updateType = $request->input("update_type");
-        $operationType = $request->input("operation_type");
-        $value = $request->input("dynamic_input");
-        $categoryIds = $request->input("categorie_ids", []);
-        $roundingOption = $request->boolean("rounding_option");
-        $roundingAmount = $request->input("rounding_amount");
-
-        $query = Product::query()->account();
-        if (!empty($categoryIds)) {
-            $query->whereIn("categorie_id", $categoryIds);
-        }
-
-        $products = $query->get();
+        $updateParams = $this->getUpdateParameters($request);
+        
+        $products = Product::query()
+            ->account()
+            ->filterByCategories($request->input("categorie_ids", []))
+            ->get();
 
         foreach ($products as $product) {
-            $originalPrice = $product->price;
+            // Update main price
+            $product->price = $this->priceService->updatePrice(
+                $product->price,
+                $updateParams['updateType'],
+                $updateParams['operationType'],
+                $updateParams['value'],
+                $updateParams['roundingOption'],
+                $updateParams['roundingAmount']
+            );
 
-            if ($updateType === "amount") {
-                $adjustedPrice =
-                    $operationType === "increase"
-                        ? $originalPrice + $value
-                        : $originalPrice - $value;
-            } elseif ($updateType === "percentage") {
-                $adjustedPrice =
-                    $operationType === "increase"
-                        ? $originalPrice * (1 + $value / 100)
-                        : $originalPrice * (1 - $value / 100);
-            }
-
-            if ($roundingOption && $roundingAmount > 0) {
-                $adjustedPrice =
-                    round($adjustedPrice / $roundingAmount) * $roundingAmount;
-            }
-
-            $product->price = max($adjustedPrice, 0);
-
-            for ($i = 1; $i <= 15; $i++) {
-                $variantPriceField = "variant_price_$i";
-
-                if (!is_null($product->$variantPriceField)) {
-                    $originalVariantPrice = $product->$variantPriceField;
-
-                    if ($updateType === "amount") {
-                        $adjustedVariantPrice =
-                            $operationType === "increase"
-                                ? $originalVariantPrice + $value
-                                : $originalVariantPrice - $value;
-                    } elseif ($updateType === "percentage") {
-                        $adjustedVariantPrice =
-                            $operationType === "increase"
-                                ? $originalVariantPrice * (1 + $value / 100)
-                                : $originalVariantPrice * (1 - $value / 100);
-                    }
-
-                    if ($roundingOption && $roundingAmount > 0) {
-                        $adjustedVariantPrice =
-                            round($adjustedVariantPrice / $roundingAmount) *
-                            $roundingAmount;
-                    }
-
-                    $product->$variantPriceField = max(
-                        $adjustedVariantPrice,
-                        0
-                    );
-                }
+            // Update only non-empty variant prices
+            foreach ($product->getVariantPriceFields() as $variantField) {
+                $product->$variantField = $this->priceService->updatePrice(
+                    $product->$variantField,
+                    $updateParams['updateType'],
+                    $updateParams['operationType'],
+                    $updateParams['value'],
+                    $updateParams['roundingOption'],
+                    $updateParams['roundingAmount']
+                );
             }
 
             $product->save();
         }
+
 
         return redirect()
             ->back()
             ->with("success", "Fiyatlar başarıyla güncellendi.");
     }
 
+
+    private function getUpdateParameters(Request $request): array
+    {
+        return [
+            'updateType' => $request->input("update_type"),
+            'operationType' => $request->input("operation_type"),
+            'value' => $request->input("dynamic_input"),
+            'roundingOption' => $request->boolean("rounding_option"),
+            'roundingAmount' => $request->input("rounding_amount"),
+        ];
+    }
+
+    public function deleteImage(string $id)
+    {
+        $product = Product::query()->account()->findOrFail($id);
+        
+        $product->update([
+            'images' => null
+        ]);
+        
+        return redirect()->back()->with('success', 'Ürün resmi başarıyla silindi.');
+    }
+    
     public function destroy(string $id)
     {
         $product = Product::query()
